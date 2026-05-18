@@ -61,6 +61,10 @@ const templates = {
         #session-popover:popover-open {
             transform: scale(0.04);
         }
+        #session-popover:popover-open::backdrop {
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+        }
     }
 
     #session-popover.closing {
@@ -69,9 +73,16 @@ const templates = {
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.8, 0.3), opacity 0.3s ease-in 0.1s;
     }
 
+    #session-popover.closing::backdrop {
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+        transition: backdrop-filter 0.35s ease-in;
+    }
+
     #session-popover::backdrop {
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
+        transition: backdrop-filter 0.75s ease;
     }
 
     #session-popover-inner {
@@ -305,6 +316,10 @@ const templates = {
         #session-popover:popover-open {
             transform: scale(0.04);
         }
+        #session-popover:popover-open::backdrop {
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+        }
     }
 
     #session-popover.closing {
@@ -313,9 +328,16 @@ const templates = {
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.8, 0.3), opacity 0.3s ease-in 0.1s;
     }
 
+    #session-popover.closing::backdrop {
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+        transition: backdrop-filter 0.35s ease-in;
+    }
+
     #session-popover::backdrop {
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
+        transition: backdrop-filter 0.75s ease;
     }
 
     #session-popover-inner {
