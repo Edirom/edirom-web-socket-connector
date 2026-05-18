@@ -50,29 +50,62 @@ const templates = {
         border: none;
         padding: 0;
         border-radius: 12px;
-        background: rgba(31, 35, 51, 0.97);
+        background: transparent;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         overflow: hidden;
+        transform-origin: var(--popover-origin-x, 50%) var(--popover-origin-y, 50%);
+        transition: transform 0.75s cubic-bezier(0.22, 1.15, 0.36, 1), opacity 0.15s ease-out;
+    }
+
+    @starting-style {
+        #session-popover:popover-open {
+            transform: scale(0.04);
+        }
+    }
+
+    #session-popover.closing {
+        transform: scale(0.04);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.8, 0.3), opacity 0.3s ease-in 0.1s;
+    }
+
+    #session-popover::backdrop {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
     }
 
     #session-popover-inner {
         display: flex;
         flex-direction: column;
         height: 100%;
-        padding: 24px;
+        padding: 0;
         box-sizing: border-box;
-        gap: 12px;
+        gap: 0;
     }
 
-    #session-title {
-        color: #e4d9a5;
-        font-size: 1.4rem;
-        margin: 0;
+    #session-popover-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
+        font-size: 1rem;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    #session-popover-header .status-icon {
+        width: 1.4rem;
+        height: 1.4rem;
         flex-shrink: 0;
     }
 
     #connection-news-area {
         flex-shrink: 0;
+        background-color: var(--tertiary-color);
+        padding: 0 20px;
+        box-sizing: border-box;
     }
 
     .connection-news-item {
@@ -117,18 +150,21 @@ const templates = {
     #session-content {
         flex: 1;
         overflow-y: auto;
-        color: #e4d9a5;
+        color: var(--primary-color);
+        background-color: var(--tertiary-color);
+        padding: 16px 20px;
+        box-sizing: border-box;
     }
 
     #session-content h2 {
         font-size: 1rem;
         margin: 12px 0 6px;
-        color: #cdbf86;
+        color: var(--primary-color);
     }
 
     #session-content hr {
         border: none;
-        border-top: 1px solid rgba(228, 217, 165, 0.3);
+        border-top: 1px solid rgba(35, 42, 68, 0.2);
         margin: 12px 0;
     }
 
@@ -145,7 +181,7 @@ const templates = {
         font-size: 0.9rem;
         word-break: break-all;
         margin: 4px 0 0;
-        color: #cdbf86;
+        color: var(--primary-color);
     }
 
     #session-members-list {
@@ -157,13 +193,15 @@ const templates = {
 
     #session-members-list li {
         padding: 4px 0;
-        border-bottom: 1px solid rgba(228, 217, 165, 0.15);
+        border-bottom: 1px solid rgba(35, 42, 68, 0.15);
     }
 
-    #button-row {
+    #bottom-row {
         display: flex;
         justify-content: flex-end;
         flex-shrink: 0;
+        background: transparent;
+        padding: 12px 20px;
     }
 
     #close-button {
@@ -172,22 +210,25 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 8px;
-        background: #e4d9a5;
-        color: #1f2333;
+        background: var(--secondary-color);
+        color: var(--primary-color);
         font-weight: bold;
     }
 
     #close-button:hover {
-        background: #cdbf86;
+        background: color-mix(in oklch, var(--secondary-color) 85%, black);
     }
 </style>
 <div id="ws-container">
     <button id="ws-button" aria-label="WebSocket Verbindung">
-        <edirom-icon name="devices" size="fill" id="status-icon"></edirom-icon>
+        <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
     </button>
     <div id="session-popover" popover="manual">
         <div id="session-popover-inner">
-            <h1 id="session-title">Sitzungsinformationen</h1>
+            <div id="session-popover-header">
+                <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
+                <span>Vernetzte Arbeitsumgebung</span>
+            </div>
             <div id="connection-news-area"></div>
             <div id="session-content">
                 <h2>Code</h2>
@@ -197,7 +238,7 @@ const templates = {
                 <h2>Mitglieder</h2>
                 <ul id="session-members-list"></ul>
             </div>
-            <div id="button-row">
+            <div id="bottom-row">
                 <button id="close-button" aria-label="Schließen">Schließen</button>
             </div>
         </div>
@@ -253,29 +294,62 @@ const templates = {
         border: none;
         padding: 0;
         border-radius: 12px;
-        background: rgba(31, 35, 51, 0.97);
+        background: transparent;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         overflow: hidden;
+        transform-origin: var(--popover-origin-x, 50%) var(--popover-origin-y, 50%);
+        transition: transform 0.75s cubic-bezier(0.22, 1.15, 0.36, 1), opacity 0.15s ease-out;
+    }
+
+    @starting-style {
+        #session-popover:popover-open {
+            transform: scale(0.04);
+        }
+    }
+
+    #session-popover.closing {
+        transform: scale(0.04);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.8, 0.3), opacity 0.3s ease-in 0.1s;
+    }
+
+    #session-popover::backdrop {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
     }
 
     #session-popover-inner {
         display: flex;
         flex-direction: column;
         height: 100%;
-        padding: 20px 16px 16px;
+        padding: 0;
         box-sizing: border-box;
-        gap: 10px;
+        gap: 0;
     }
 
-    #session-title {
-        color: #e4d9a5;
-        font-size: 1.3rem;
-        margin: 0;
+    #session-popover-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
+        font-size: 1rem;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    #session-popover-header .status-icon {
+        width: 1.4rem;
+        height: 1.4rem;
         flex-shrink: 0;
     }
 
     #connection-news-area {
         flex-shrink: 0;
+        background-color: var(--tertiary-color);
+        padding: 0 20px;
+        box-sizing: border-box;
     }
 
     .connection-news-item {
@@ -320,19 +394,21 @@ const templates = {
     #session-content {
         flex: 1;
         overflow-y: auto;
-        color: #e4d9a5;
+        color: var(--primary-color);
+        background-color: var(--tertiary-color);
+        padding: 16px 20px;
+        box-sizing: border-box;
         -webkit-overflow-scrolling: touch;
     }
 
     #session-content h2 {
         font-size: 1rem;
         margin: 12px 0 6px;
-        color: #cdbf86;
     }
 
     #session-content hr {
         border: none;
-        border-top: 1px solid rgba(228, 217, 165, 0.3);
+        border-top: 1px solid rgba(35, 42, 68, 0.2);
         margin: 12px 0;
     }
 
@@ -349,7 +425,6 @@ const templates = {
         font-size: 0.85rem;
         word-break: break-all;
         margin: 4px 0 0;
-        color: #cdbf86;
     }
 
     #session-members-list {
@@ -361,13 +436,15 @@ const templates = {
 
     #session-members-list li {
         padding: 6px 0;
-        border-bottom: 1px solid rgba(228, 217, 165, 0.15);
+        border-bottom: 1px solid rgba(35, 42, 68, 0.15);
     }
 
-    #button-row {
+    #bottom-row {
         display: flex;
         justify-content: flex-end;
         flex-shrink: 0;
+        background: transparent;
+        padding: 12px 20px;
     }
 
     #close-button {
@@ -376,23 +453,26 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 8px;
-        background: #e4d9a5;
-        color: #1f2333;
+        background: var(--secondary-color);
+        color: var(--primary-color);
         font-weight: bold;
         -webkit-tap-highlight-color: transparent;
     }
 
     #close-button:active {
-        background: #cdbf86;
+        background: color-mix(in oklch, var(--secondary-color) 85%, black);
     }
 </style>
 <div id="ws-container">
     <button id="ws-button" aria-label="WebSocket Verbindung">
-        <edirom-icon name="devices" size="fill" id="status-icon"></edirom-icon>
+        <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
     </button>
     <div id="session-popover" popover="manual">
         <div id="session-popover-inner">
-            <h1 id="session-title">Sitzungsinformationen</h1>
+            <div id="session-popover-header">
+                <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
+                <span>Vernetzte Arbeitsumgebung</span>
+            </div>
             <div id="connection-news-area"></div>
             <div id="session-content">
                 <h2>Code</h2>
@@ -402,7 +482,7 @@ const templates = {
                 <h2>Mitglieder</h2>
                 <ul id="session-members-list"></ul>
             </div>
-            <div id="button-row">
+            <div id="bottom-row">
                 <button id="close-button" aria-label="Schließen">Schließen</button>
             </div>
         </div>
@@ -492,7 +572,7 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     _setupElements = () => {
         this._wsButton = this.shadow.querySelector('#ws-button');
-        this._statusIcon = this.shadow.querySelector('#status-icon');
+        this._statusIcons = this.shadow.querySelectorAll('.status-icon');
         this._sessionPopover = this.shadow.querySelector('#session-popover');
         this._connectionNewsArea = this.shadow.querySelector('#connection-news-area');
         this._sessionIdEl = this.shadow.querySelector('#session-id');
@@ -503,18 +583,41 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     _setupEventListeners = () => {
         this._wsButton.addEventListener('click', () => {
-            this._sessionPopover.showPopover();
+            this._openPopover();
         });
         this._closeButton.addEventListener('click', () => {
-            this._sessionPopover.hidePopover();
+            this._closePopover();
         });
     }
 
     _handleBackRequest = (event) => {
         if (this._sessionPopover?.matches(':popover-open')) {
             event.preventDefault();
-            this._sessionPopover.hidePopover();
+            this._closePopover();
         }
+    }
+
+    _openPopover = () => {
+        const btnRect = this._wsButton.getBoundingClientRect();
+        const btnCenterX = btnRect.left + btnRect.width / 2;
+        const btnCenterY = btnRect.top + btnRect.height / 2;
+        const popoverLeft = window.innerWidth * 0.025;
+        const popoverTop = window.innerHeight * 0.025;
+        this._sessionPopover.style.setProperty('--popover-origin-x', `${btnCenterX - popoverLeft}px`);
+        this._sessionPopover.style.setProperty('--popover-origin-y', `${btnCenterY - popoverTop}px`);
+        this._sessionPopover.showPopover();
+    }
+
+    _closePopover = () => {
+        this._sessionPopover.classList.add('closing');
+        const handler = (event) => {
+            if (event.propertyName === 'transform') {
+                this._sessionPopover.removeEventListener('transitionend', handler);
+                this._sessionPopover.classList.remove('closing');
+                this._sessionPopover.hidePopover();
+            }
+        };
+        this._sessionPopover.addEventListener('transitionend', handler);
     }
 
     // -------------------------------------------------------------------------
@@ -527,9 +630,11 @@ class EdiromWebSocketConnector extends HTMLElement {
     }
 
     _updateStatusIcon = () => {
-        if (!this._statusIcon) return;
+        if (!this._statusIcons || this._statusIcons.length === 0) return;
         const color = CONNECTION_STATE_COLORS[this._connectionState] ?? 'red';
-        this._statusIcon.setAttribute('color', color);
+        for (const icon of this._statusIcons) {
+            icon.setAttribute('color', color);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -679,7 +784,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._connectionNewsArea.appendChild(item);
 
         if (!this._sessionPopover.matches(':popover-open')) {
-            this._sessionPopover.showPopover();
+            this._openPopover();
         }
     }
 }
