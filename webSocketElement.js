@@ -1,304 +1,690 @@
-console.log("WebSocket Webcomponent loaded");
+import '../edirom-core-web-components/src/edirom-icon.js';
 
-const template = document.createElement("template");
-template.innerHTML = `
-    <div>
-        <style>
-            #small-info-container {
-                background-color: yellow;
-                /* height: 100%; */
-                /* max-height: 100%; */
-                justify-content: center;
-                padding: 4px;
-            }
+console.log("WebSocket Connector Web Component loaded");
 
-            #small-info-container:hover {
-                cursor: pointer;
-            }
+const templates = {
+    desktop: `
+<style>
+    :host {
+        display: block;
+        height: 100%;
+    }
 
-            #small-info-container[class="disconnected"] {
-                background-color: red;
-            }
+    #ws-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
 
-            #small-info-container[class="connected"] {
-                background-color: #83c702;
-            }
+    #ws-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        -webkit-user-select: none;
+        user-select: none;
+    }
 
+    #ws-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
 
+    #ws-button edirom-icon {
+        width: 100%;
+        height: 100%;
+    }
 
-            svg {
-                transform: translateY(20%);
-            }
+    #session-popover {
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        width: 95dvw;
+        height: 95dvh;
+        border: none;
+        padding: 0;
+        border-radius: 12px;
+        background: rgba(31, 35, 51, 0.97);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+    }
 
-            #session-members-number {
-                font-size: 1.2rem;
-                font-weight: bold;
-                margin-left: 2px;
-            }
+    #session-popover-inner {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 24px;
+        box-sizing: border-box;
+        gap: 12px;
+    }
 
-            #connection-news-popover {
-                position: absolute;
-                inset: unset;
-                top: 42px;
-                left: 50%;
-                transform: translate(-50%, 0);
-                background-color: transparent;
-                max-width: 90%;
-                border: none;
-            }
+    #session-title {
+        color: #e4d9a5;
+        font-size: 1.4rem;
+        margin: 0;
+        flex-shrink: 0;
+    }
 
-            .connection-news-div {
-                color: black;
-                text-align: center;
-                border-radius: 8px;
-                border: none;
-                box-shadow: 3px 6px 6px hsl(0deg 0% 0% / 0.45);
-                font-size: 1.3rem;
-                padding: 10px;
-                margin: 10px;
-            }
+    #connection-news-area {
+        flex-shrink: 0;
+    }
 
-            .connection-news-div.connect {
-                background-color: #83c702;
-            }
-            .connection-news-div.disconnect {
-                background-color: red;
-            }
+    .connection-news-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        font-size: 1rem;
+        color: #1f2333;
+        font-weight: 500;
+    }
 
-            .connection-news-div p {
-                margin: 0;
-            }
+    .connection-news-item.connect {
+        background-color: #83c702;
+    }
 
-            #info-popover {
-                width: 600px;
-                height: 600px;
-                padding: 10px;
-                background-color: rgb(221, 221, 221);
-                border: 1px solid black;
-                box-shadow: 5.0px 10px 10px hsl(0deg 0% 0% / 0.55);
-            }
+    .connection-news-item.disconnect {
+        background-color: #e05353;
+        color: #fff;
+    }
 
-            #session-id-container {
-                text-align: center;
-            }
+    .connection-news-item p {
+        margin: 0;
+        flex: 1;
+    }
 
-            #session-id {
-                font-size: 1rem;
-            }
+    .connection-news-dismiss {
+        border: none;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: inherit;
+        flex-shrink: 0;
+    }
 
-            #session-members-list {
-                font-size: 1.15rem;
-            }
-        </style>
-        <div id="web-socket-container">
-            <div id="small-info-container">
-                <span id="session-members"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="black">
-                        <path d="M80-160v-120h80v-440q0-33 23.5-56.5T240-800h600v80H240v440h240v120H80Zm520 0q-17 0-28.5-11.5T560-200v-400q0-17 11.5-28.5T600-640h240q17 0 28.5 11.5T880-600v400q0 17-11.5 28.5T840-160H600Zm40-120h160v-280H640v280Zm0 0h160-160Z" />
-                    </svg><span id="session-members-number">0</span></span>
-            </div>
-            <div id="connection-news-popover" popover="manual"></div>
-            <div id="info-popover" popover="manual">
-                <h1>Sitzungsinformationen</h1>
+    #session-content {
+        flex: 1;
+        overflow-y: auto;
+        color: #e4d9a5;
+    }
+
+    #session-content h2 {
+        font-size: 1rem;
+        margin: 12px 0 6px;
+        color: #cdbf86;
+    }
+
+    #session-content hr {
+        border: none;
+        border-top: 1px solid rgba(228, 217, 165, 0.3);
+        margin: 12px 0;
+    }
+
+    #qr-code-placeholder {
+        text-align: center;
+    }
+
+    #qr-code-placeholder img {
+        max-width: 180px;
+    }
+
+    #session-id {
+        text-align: center;
+        font-size: 0.9rem;
+        word-break: break-all;
+        margin: 4px 0 0;
+        color: #cdbf86;
+    }
+
+    #session-members-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    #session-members-list li {
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(228, 217, 165, 0.15);
+    }
+
+    #button-row {
+        display: flex;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
+    #close-button {
+        padding: 12px 28px;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        background: #e4d9a5;
+        color: #1f2333;
+        font-weight: bold;
+    }
+
+    #close-button:hover {
+        background: #cdbf86;
+    }
+</style>
+<div id="ws-container">
+    <button id="ws-button" aria-label="WebSocket Verbindung">
+        <edirom-icon name="devices" size="fill" id="status-icon"></edirom-icon>
+    </button>
+    <div id="session-popover" popover="manual">
+        <div id="session-popover-inner">
+            <h1 id="session-title">Sitzungsinformationen</h1>
+            <div id="connection-news-area"></div>
+            <div id="session-content">
                 <h2>Code</h2>
-                <div id="session-id-container">
-                    <div id="qr-code-placeholder">QR-CODE HIER</div>
-                    <p id="session-id"></p>
-                </div>
+                <div id="qr-code-placeholder"></div>
+                <p id="session-id"></p>
                 <hr />
                 <h2>Mitglieder</h2>
-                <ul id="session-members-list">
-                </ul>
+                <ul id="session-members-list"></ul>
+            </div>
+            <div id="button-row">
+                <button id="close-button" aria-label="Schließen">Schließen</button>
             </div>
         </div>
     </div>
+</div>
+`,
+
+    mobile: `
+<style>
+    :host {
+        display: block;
+        height: 100%;
+    }
+
+    #ws-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    #ws-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    #ws-button:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    #ws-button edirom-icon {
+        width: 100%;
+        height: 100%;
+    }
+
+    #session-popover {
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        width: 95dvw;
+        height: 95dvh;
+        border: none;
+        padding: 0;
+        border-radius: 12px;
+        background: rgba(31, 35, 51, 0.97);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+    }
+
+    #session-popover-inner {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 20px 16px 16px;
+        box-sizing: border-box;
+        gap: 10px;
+    }
+
+    #session-title {
+        color: #e4d9a5;
+        font-size: 1.3rem;
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    #connection-news-area {
+        flex-shrink: 0;
+    }
+
+    .connection-news-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        font-size: 1rem;
+        color: #1f2333;
+        font-weight: 500;
+    }
+
+    .connection-news-item.connect {
+        background-color: #83c702;
+    }
+
+    .connection-news-item.disconnect {
+        background-color: #e05353;
+        color: #fff;
+    }
+
+    .connection-news-item p {
+        margin: 0;
+        flex: 1;
+    }
+
+    .connection-news-dismiss {
+        border: none;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: inherit;
+        flex-shrink: 0;
+    }
+
+    #session-content {
+        flex: 1;
+        overflow-y: auto;
+        color: #e4d9a5;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #session-content h2 {
+        font-size: 1rem;
+        margin: 12px 0 6px;
+        color: #cdbf86;
+    }
+
+    #session-content hr {
+        border: none;
+        border-top: 1px solid rgba(228, 217, 165, 0.3);
+        margin: 12px 0;
+    }
+
+    #qr-code-placeholder {
+        text-align: center;
+    }
+
+    #qr-code-placeholder img {
+        max-width: min(220px, 60vw);
+    }
+
+    #session-id {
+        text-align: center;
+        font-size: 0.85rem;
+        word-break: break-all;
+        margin: 4px 0 0;
+        color: #cdbf86;
+    }
+
+    #session-members-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    #session-members-list li {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(228, 217, 165, 0.15);
+    }
+
+    #button-row {
+        display: flex;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
+    #close-button {
+        padding: 12px 28px;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        background: #e4d9a5;
+        color: #1f2333;
+        font-weight: bold;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #close-button:active {
+        background: #cdbf86;
+    }
+</style>
+<div id="ws-container">
+    <button id="ws-button" aria-label="WebSocket Verbindung">
+        <edirom-icon name="devices" size="fill" id="status-icon"></edirom-icon>
+    </button>
+    <div id="session-popover" popover="manual">
+        <div id="session-popover-inner">
+            <h1 id="session-title">Sitzungsinformationen</h1>
+            <div id="connection-news-area"></div>
+            <div id="session-content">
+                <h2>Code</h2>
+                <div id="qr-code-placeholder"></div>
+                <p id="session-id"></p>
+                <hr />
+                <h2>Mitglieder</h2>
+                <ul id="session-members-list"></ul>
+            </div>
+            <div id="button-row">
+                <button id="close-button" aria-label="Schließen">Schließen</button>
+            </div>
+        </div>
+    </div>
+</div>
 `
+};
 
-// Libraries
-let qrCodeJsElement = document.createElement("script");
-qrCodeJsElement.setAttribute("defer", "defer");
-qrCodeJsElement.setAttribute("src", "resources/webcomponents/webSocket/qrcode.js")
-document.querySelector("head").appendChild(qrCodeJsElement);
+const CONNECTION_STATE_COLORS = {
+    disconnected: 'red',
+    connected: 'orange',
+    session: '#83c702'
+};
 
 
+class EdiromWebSocketConnector extends HTMLElement {
 
-class webSocketElement extends HTMLElement {
     constructor() {
         super();
-        let me = this;
-        // Elements
-        this.shadow = this.attachShadow({ mode: "open" });
-        this.shadow.append(template.content.cloneNode(true))
-        this.webSocketContainer = this.shadow.querySelector("#web-socket-container");
-        this.smallInfoContainer = this.shadow.querySelector("#small-info-container");
-        this.sessionIdSpan = this.shadow.querySelector("#session-id");
-        this.connectionNewsPopover = this.shadow.querySelector("#connection-news-popover");
-        this.sessionMembersNumberP = this.shadow.querySelector("#session-members-number");
-        this.infoPopover = this.shadow.querySelector("#info-popover");
-        this.sessionMembersList = this.shadow.querySelector("#session-members-list");
-
-        // Variables
-        this.webSocket;
-        this.clientId = null;
-        this.sessionId = null;
-        this.sessionData = []; // TODO: This should also be filled when the edirom first conects to the session
-
-        // Event listeners
-        this.smallInfoContainer.addEventListener("click", (event) => {
-            console.log("SmallInfoContainer clicked!");
-            this.infoPopover.togglePopover();
-        });
+        this.shadow = this.attachShadow({ mode: 'open', delegatesFocus: true });
+        this._mode = 'desktop';
+        this._connectionState = 'disconnected';
+        this._webSocket = null;
+        this._clientId = null;
+        this._sessionId = null;
+        this._sessionData = null;
     }
 
     static get observedAttributes() {
-        return [];
+        return ['layout-mode', 'ws-url'];
     }
 
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
+
     connectedCallback() {
-        this.webSocket = new WebSocket("ws://localhost:3000");
-        this.webSocket.onopen = (event) => {
-            console.log("Connection opened!");
-            this.smallInfoContainer.classList.remove("disconnected");
-            this.smallInfoContainer.classList.add("connected");
-
-            this.webSocket.send(JSON.stringify({ "request": "giveClientId" }));
-            this.webSocket.send(JSON.stringify({ "request": "giveSessionId" })); // TODO: Can't I just do this with "giveSessionData"?
-            this.sendUserAgent();
-            this.webSocket.send(JSON.stringify({ "request": "giveSessionData" }));
-        };
-        this.webSocket.onclose = (event) => {
-            console.log("Connection closed!");
-            this.smallInfoContainer.classList.remove("connected");
-            this.smallInfoContainer.classList.add("disconnected");
-            this.sessionMembersNumberP.textContent = "0";
-        };
-        this.webSocket.onmessage = (event) => {
-            console.log("Received data!");
-            console.log(event.data);
-            const dataJson = JSON.parse(event.data);
-            if (dataJson.sessionId && this.sessionId === null) {
-                this.setSessionId(dataJson.sessionId);
-                this.sessionMembersNumberP.textContent = "1"; // TODO Get the real session data from the server so its not hard coded
-            }
-            else if (dataJson.clientId && this.clientId === null) {
-                this.clientId = dataJson.clientId;
-            }
-            else if (dataJson.message) { // TODO: Implmement better filtering of the different types of messages
-                console.log("Received message!");
-                const receivedMessage = new CustomEvent('received-message', {
-                    detail: dataJson,
-                    bubbles: true
-                });
-                this.dispatchEvent(receivedMessage);
-            }
-            else if (dataJson.response === "clientConnected") {
-                console.log("Client connected!");
-                this.handleNewDeviceConnection(dataJson);
-
-            }
-            else if (dataJson.response === "clientConnected") {
-                console.log("Client connected!");
-                this.handleNewDeviceConnection(dataJson);
-
-            }
-            else if (dataJson.response === "clientDisconnected") {
-                console.log("Client disconnected!");
-                this.handleDeviceDisconnection(dataJson);
-
-            } else if (dataJson.sessionData) { // The filtering of messages is getting out of control and depends on the order of the messages at this point. Improving this should be high priority!
-                this.sessionData = dataJson.sessionData;
-                this.handleSessionDataUpdate();
-            }
-
-        };
+        console.log('EdiromWebSocketConnector connected!');
+        this._mode = this._getLayoutMode(this.getAttribute('layout-mode'));
+        this._applyTemplate();
+        this._setupElements();
+        this._setupEventListeners();
+        this._connect();
+        this.setAttribute('data-handles-back-request', '');
+        this.addEventListener('back-request', this._handleBackRequest);
     }
 
     disconnectedCallback() {
-        console.log("WebSocket Webcomponent disconnected!");
+        console.log('EdiromWebSocketConnector disconnected!');
+        this.removeEventListener('back-request', this._handleBackRequest);
+        if (this._webSocket) {
+            this._webSocket.onclose = null; // prevent state updates after removal
+            this._webSocket.close();
+            this._webSocket = null;
+        }
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        console.log(name, oldValue, newValue);
         if (oldValue === newValue) return;
-
-    }
-
-    setSessionId = (sessionId) => {
-        this.sessionId = sessionId;
-        this.sessionIdSpan.textContent = sessionId;
-        var qr = qrcode(0, "L");
-        qr.addData(sessionId.toString());
-        qr.make();
-        this.shadow.querySelector('#qr-code-placeholder').innerHTML = qr.createImgTag(6);
-    }
-
-    handleNewDeviceConnection = (data) => {
-        console.log("New device connected!");
-        this.sessionData = data.sessionData;
-        this.handleSessionDataUpdate();
-        this.showConnectionNewsPopover(data.clientData, "connect");
-    }
-
-    handleDeviceDisconnection = (data) => {
-        console.log("A Device disconnected!");
-        this.sessionData = data.sessionData;
-        this.handleSessionDataUpdate();
-        this.showConnectionNewsPopover(data.clientData, "disconnect");
-    }
-
-    handleSessionDataUpdate = () => {
-        const numberOfSessionMembers = this.sessionData.sessionMembers.length;
-        // small info window
-        this.sessionMembersNumberP.textContent = numberOfSessionMembers;
-        // member list
-        const ownClient = this.sessionData.sessionMembers.find(client => client.id === this.clientId);
-        console.log(this.sessionData);
-        const otherMembers = this.sessionData.sessionMembers.filter(client => client.id !== this.clientId);
-        this.sessionMembersList.innerHTML = "";
-        let newMember = document.createElement("li");
-        newMember.textContent = `Du: ${ownClient.metadata.deviceType} ${ownClient.metadata.os} ${ownClient.metadata.browser}`;
-        this.sessionMembersList.appendChild(newMember);
-        for (let member of otherMembers) {
-            let newMember = document.createElement("li");
-            newMember.textContent = `${member.metadata.deviceType} ${member.metadata.os} ${member.metadata.browser}`;
-            this.sessionMembersList.appendChild(newMember);
-        }
-    }
-
-    showConnectionNewsPopover = (clientData, type) => {
-        let newDiv = document.createElement("div");
-        newDiv.classList.add("connection-news-div");
-        newDiv.classList.add(type);
-        let newP = document.createElement("p");
-        let deviceDataString = `${clientData.metadata.deviceType} ${clientData.metadata.os} ${clientData.metadata.browser}`;
-        if (type === "connect") {
-            newP.textContent = `Ein neues Gerät "${deviceDataString}" ist Ihrer Sitzung beigetreten!`;
-        }
-        else if (type === "disconnect") {
-            newP.textContent = `Ein Gerät "${deviceDataString}" hat die Sitzung verlassen!`;
-        }
-        let newButton = document.createElement("button");
-        newButton.classList.add("connection-news-btn");
-        newButton.textContent = "Ok";
-        newButton.addEventListener("click", (event) => {
-            newDiv.remove();
-            if (this.shadow.querySelectorAll(".connection-news-div").length === 0) {
-                this.connectionNewsPopover.hidePopover();
+        if (name === 'layout-mode') {
+            this._mode = this._getLayoutMode(newValue);
+            if (this.isConnected) {
+                this._applyTemplate();
+                this._setupElements();
+                this._setupEventListeners();
+                this._updateStatusIcon();
             }
+        } else if (name === 'ws-url') {
+            if (this.isConnected) {
+                this._reconnect();
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Template & Elements
+    // -------------------------------------------------------------------------
+
+    _getLayoutMode = (layoutMode) => layoutMode === 'mobile' ? 'mobile' : 'desktop';
+
+    _applyTemplate = () => {
+        const template = document.createElement('template');
+        template.innerHTML = templates[this._mode];
+        this.shadow.innerHTML = '';
+        this.shadow.append(template.content.cloneNode(true));
+    }
+
+    _setupElements = () => {
+        this._wsButton = this.shadow.querySelector('#ws-button');
+        this._statusIcon = this.shadow.querySelector('#status-icon');
+        this._sessionPopover = this.shadow.querySelector('#session-popover');
+        this._connectionNewsArea = this.shadow.querySelector('#connection-news-area');
+        this._sessionIdEl = this.shadow.querySelector('#session-id');
+        this._qrCodePlaceholder = this.shadow.querySelector('#qr-code-placeholder');
+        this._membersList = this.shadow.querySelector('#session-members-list');
+        this._closeButton = this.shadow.querySelector('#close-button');
+    }
+
+    _setupEventListeners = () => {
+        this._wsButton.addEventListener('click', () => {
+            this._sessionPopover.showPopover();
         });
-        newDiv.appendChild(newP);
-        newDiv.appendChild(newButton);
-        this.connectionNewsPopover.appendChild(newDiv);
-        this.connectionNewsPopover.showPopover();
+        this._closeButton.addEventListener('click', () => {
+            this._sessionPopover.hidePopover();
+        });
     }
 
-    sendUserAgent = () => {
-        const userAgent = navigator.userAgent;
-        const messageString = JSON.stringify({ message: "userAgent", userAgent: userAgent });
-        this.webSocket.send(messageString);
+    _handleBackRequest = (event) => {
+        if (this._sessionPopover?.matches(':popover-open')) {
+            event.preventDefault();
+            this._sessionPopover.hidePopover();
+        }
     }
 
+    // -------------------------------------------------------------------------
+    // Connection State
+    // -------------------------------------------------------------------------
 
+    _setConnectionState = (state) => {
+        this._connectionState = state;
+        this._updateStatusIcon();
+    }
+
+    _updateStatusIcon = () => {
+        if (!this._statusIcon) return;
+        const color = CONNECTION_STATE_COLORS[this._connectionState] ?? 'red';
+        this._statusIcon.setAttribute('color', color);
+    }
+
+    // -------------------------------------------------------------------------
+    // WebSocket
+    // -------------------------------------------------------------------------
+
+    _connect = () => {
+        const wsUrl = this.getAttribute('ws-url');
+        if (!wsUrl) {
+            console.warn('EdiromWebSocketConnector: no ws-url attribute set, skipping connection.');
+            return;
+        }
+
+        if (this._webSocket) {
+            this._webSocket.onclose = null;
+            this._webSocket.close();
+        }
+
+        this._clientId = null;
+        this._sessionId = null;
+        this._sessionData = null;
+
+        this._webSocket = new WebSocket(wsUrl);
+
+        this._webSocket.onopen = () => {
+            console.log('EdiromWebSocketConnector: connection opened.');
+            this._setConnectionState('connected');
+            this._webSocket.send(JSON.stringify({ request: 'giveClientId' }));
+            this._webSocket.send(JSON.stringify({ request: 'giveSessionId' }));
+            this._sendUserAgent();
+            this._webSocket.send(JSON.stringify({ request: 'giveSessionData' }));
+        };
+
+        this._webSocket.onclose = () => {
+            console.log('EdiromWebSocketConnector: connection closed.');
+            this._setConnectionState('disconnected');
+            this._sessionId = null;
+            this._clientId = null;
+            this._sessionData = null;
+            if (this._membersList) this._membersList.innerHTML = '';
+            if (this._qrCodePlaceholder) this._qrCodePlaceholder.innerHTML = '';
+            if (this._sessionIdEl) this._sessionIdEl.textContent = '';
+        };
+
+        this._webSocket.onmessage = (event) => {
+            let dataJson;
+            try {
+                dataJson = JSON.parse(event.data);
+            } catch (e) {
+                console.error('EdiromWebSocketConnector: could not parse message.', e);
+                return;
+            }
+            this._handleMessage(dataJson);
+        };
+    }
+
+    _reconnect = () => {
+        this._connect();
+    }
+
+    _handleMessage = (dataJson) => {
+        if (dataJson.sessionId && this._sessionId === null) {
+            this._setSessionId(dataJson.sessionId);
+        } else if (dataJson.clientId && this._clientId === null) {
+            this._clientId = dataJson.clientId;
+        } else if (dataJson.message) {
+            this.dispatchEvent(new CustomEvent('received-message', {
+                detail: dataJson,
+                bubbles: true,
+                composed: true
+            }));
+        } else if (dataJson.response === 'clientConnected') {
+            console.log('EdiromWebSocketConnector: client connected.');
+            this._sessionData = dataJson.sessionData;
+            this._updateMembersList();
+            this._showConnectionNews(dataJson.clientData, 'connect');
+        } else if (dataJson.response === 'clientDisconnected') {
+            console.log('EdiromWebSocketConnector: client disconnected.');
+            this._sessionData = dataJson.sessionData;
+            this._updateMembersList();
+            this._showConnectionNews(dataJson.clientData, 'disconnect');
+        } else if (dataJson.sessionData) {
+            this._sessionData = dataJson.sessionData;
+            this._updateMembersList();
+        }
+    }
+
+    _sendUserAgent = () => {
+        this._webSocket.send(JSON.stringify({ message: 'userAgent', userAgent: navigator.userAgent }));
+    }
+
+    // -------------------------------------------------------------------------
+    // Session Info
+    // -------------------------------------------------------------------------
+
+    _setSessionId = (sessionId) => {
+        this._sessionId = sessionId;
+        this._setConnectionState('session');
+        if (this._sessionIdEl) {
+            this._sessionIdEl.textContent = sessionId;
+        }
+        if (this._qrCodePlaceholder) {
+            if (typeof qrcode === 'function') {
+                const qr = qrcode(0, 'L');
+                qr.addData(sessionId.toString());
+                qr.make();
+                this._qrCodePlaceholder.innerHTML = qr.createImgTag(6);
+            } else {
+                this._qrCodePlaceholder.textContent = sessionId;
+            }
+        }
+    }
+
+    _updateMembersList = () => {
+        if (!this._sessionData || !this._membersList) return;
+        const members = this._sessionData.sessionMembers ?? [];
+        this._membersList.innerHTML = '';
+        for (const member of members) {
+            const li = document.createElement('li');
+            const isOwn = member.id === this._clientId;
+            const label = `${member.metadata?.deviceType ?? ''} ${member.metadata?.os ?? ''} ${member.metadata?.browser ?? ''}`.trim();
+            li.textContent = isOwn ? `Du: ${label}` : label;
+            this._membersList.appendChild(li);
+        }
+    }
+
+    _showConnectionNews = (clientData, type) => {
+        if (!this._connectionNewsArea) return;
+        const item = document.createElement('div');
+        item.classList.add('connection-news-item', type);
+
+        const p = document.createElement('p');
+        const deviceLabel = `${clientData?.metadata?.deviceType ?? ''} ${clientData?.metadata?.os ?? ''} ${clientData?.metadata?.browser ?? ''}`.trim();
+        p.textContent = type === 'connect'
+            ? `Ein neues Gerät "${deviceLabel}" ist Ihrer Sitzung beigetreten!`
+            : `Ein Gerät "${deviceLabel}" hat die Sitzung verlassen!`;
+
+        const dismissBtn = document.createElement('button');
+        dismissBtn.classList.add('connection-news-dismiss');
+        dismissBtn.textContent = 'Ok';
+        dismissBtn.addEventListener('click', () => {
+            item.remove();
+        });
+
+        item.appendChild(p);
+        item.appendChild(dismissBtn);
+        this._connectionNewsArea.appendChild(item);
+
+        if (!this._sessionPopover.matches(':popover-open')) {
+            this._sessionPopover.showPopover();
+        }
+    }
 }
 
-customElements.define("edirom-web-socket", webSocketElement);
+if (!customElements.get('edirom-web-socket-connector')) {
+    customElements.define('edirom-web-socket-connector', EdiromWebSocketConnector);
+}
 
