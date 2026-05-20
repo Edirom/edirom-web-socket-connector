@@ -1559,7 +1559,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         // Intro text
         const introText = document.createElement('p');
         introText.className = 'intro-text';
-        introText.textContent = 'In der Vernetzten Arbeitsumgebung können Sie die digitale Edition auf mehreren Geräten gleichzeitig nutzen.';
+        introText.textContent = 'Mit der vernetzten Arbeitsumgebung können Sie die digitale Edition auf mehreren Geräten gleichzeitig nutzen.';
         page.appendChild(introText);
 
         return page;
@@ -1654,7 +1654,7 @@ class EdiromWebSocketConnector extends HTMLElement {
 
         const inputLabel = document.createElement('p');
         inputLabel.className = 'join-input-label';
-        inputLabel.textContent = 'Session-ID eingeben:';
+        inputLabel.textContent = 'Sitzungs-ID eingeben:';
 
         const input = document.createElement('input');
         input.type = 'text';
