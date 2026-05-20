@@ -255,41 +255,55 @@ const templates = {
         color: var(--primary-color);
     }
 
+    .device-name-label {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
     .device-name-text {
-        flex: 1;
+        flex: 0 1 auto;
+        min-width: 0;
         font-weight: 600;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        padding: 4px 8px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        box-sizing: border-box;
+        cursor: pointer;
     }
 
     .device-name-input {
-        flex: 1;
+        flex: 0 1 auto;
+        min-width: 5ch;
         font-size: 0.95rem;
+        font-weight: 600;
         padding: 4px 8px;
         border: 1px solid color-mix(in oklch, var(--secondary-color) 70%, transparent);
         border-radius: 6px;
         background: transparent;
         color: var(--primary-color);
         font-family: inherit;
+        box-sizing: border-box;
+        field-sizing: content;
+    }
+
+    .device-name-row .icon-button {
+        width: 20px;
+        height: 20px;
     }
 
     .icon-button {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
         padding: 0;
         border: none;
         border-radius: 6px;
         background: transparent;
         cursor: pointer;
         flex-shrink: 0;
-    }
-
-    .icon-button:hover {
-        background: rgba(0, 0, 0, 0.1);
     }
 
     .icon-button edirom-icon {
@@ -789,31 +803,49 @@ const templates = {
         color: var(--primary-color);
     }
 
+    .device-name-label {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
     .device-name-text {
-        flex: 1;
+        flex: 0 1 auto;
+        min-width: 0;
         font-weight: 600;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        padding: 6px 10px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        box-sizing: border-box;
+        cursor: pointer;
     }
 
     .device-name-input {
-        flex: 1;
+        flex: 0 1 auto;
+        min-width: 5ch;
         font-size: 0.95rem;
+        font-weight: 600;
         padding: 6px 10px;
         border: 1px solid color-mix(in oklch, var(--secondary-color) 70%, transparent);
         border-radius: 6px;
         background: transparent;
         color: var(--primary-color);
         font-family: inherit;
+        box-sizing: border-box;
+        field-sizing: content;
+    }
+
+    .device-name-row .icon-button {
+        width: 20px;
+        height: 20px;
     }
 
     .icon-button {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
         padding: 0;
         border: none;
         border-radius: 6px;
@@ -1112,9 +1144,10 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._applyTemplate();
         this._setupElements();
         this._setupEventListeners();
-        this._connect();
+        // this._connect();
         this.setAttribute('data-handles-back-request', '');
         this.addEventListener('back-request', this._handleBackRequest);
+        this.initDeviceName();
     }
 
     disconnectedCallback() {
@@ -1433,11 +1466,12 @@ class EdiromWebSocketConnector extends HTMLElement {
         deviceNameRow.className = 'device-name-row';
 
         const label = document.createElement('span');
+        label.className = 'device-name-label';
         label.textContent = 'Gerätename:';
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'device-name-text';
-        nameSpan.textContent = this.deviceName || '—';
+        nameSpan.textContent = this.deviceName || '';
 
         const editButton = document.createElement('button');
         editButton.className = 'icon-button';
@@ -1447,21 +1481,25 @@ class EdiromWebSocketConnector extends HTMLElement {
         editIcon.setAttribute('size', 'fill');
         editButton.appendChild(editIcon);
 
-        editButton.addEventListener('click', () => {
+        const startEditing = () => {
+            if (deviceNameRow.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'device-name-input';
             input.value = this.deviceName || '';
+            input.minLength = 1;
             input.maxLength = 64;
 
             const save = () => {
-                const newName = input.value.trim() || 'Anonymous Device';
+                console.log('Saving device name:', input.value);
+                const newName = input.value.trim()
                 this.deviceName = newName;
                 this.onDeviceNameChange();
                 nameSpan.textContent = newName;
                 if (input.parentNode === deviceNameRow) {
                     deviceNameRow.replaceChild(nameSpan, input);
                 }
+                editButton.style.visibility = '';
             };
 
             input.addEventListener('blur', save);
@@ -1471,13 +1509,18 @@ class EdiromWebSocketConnector extends HTMLElement {
                     if (input.parentNode === deviceNameRow) {
                         deviceNameRow.replaceChild(nameSpan, input);
                     }
+                    editButton.style.visibility = '';
                 }
             });
 
             deviceNameRow.replaceChild(input, nameSpan);
+            editButton.style.visibility = 'hidden';
             input.focus();
             input.select();
-        });
+        };
+
+        nameSpan.addEventListener('click', startEditing);
+        editButton.addEventListener('click', startEditing);
 
         deviceNameRow.appendChild(label);
         deviceNameRow.appendChild(nameSpan);
@@ -1713,19 +1756,24 @@ class EdiromWebSocketConnector extends HTMLElement {
             deviceType = 'Computer';
         }
 
-        return `${vendor} ${osName} ${deviceType}`.trim();
+        let deviceName = `${vendor} ${osName} ${deviceType}`.trim();
+
+        if (!deviceName) {
+            deviceName = 'Unknown Device';
+        }
+
+        return deviceName;
     }
 
     initDeviceName = () => {
+        console.log('EdiromWebSocketConnector: initializing device name...');
         let deviceName = "";
         deviceName = localStorage.getItem('workspace-device-name');
         if (!deviceName) {
             deviceName = this.generateDeviceName();
         }
-        if (!deviceName) {
-            deviceName = "Anonymous Device";
-        }
         this.deviceName = deviceName;
+        console.log('EdiromWebSocketConnector: initialized device name as', this.deviceName);
         this.onDeviceNameChange();
     }
 
