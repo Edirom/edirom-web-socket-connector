@@ -1186,8 +1186,11 @@ class EdiromWebSocketConnector extends HTMLElement {
     }
 
     _handleBackRequest = (event) => {
-        if (this._sessionPopover?.matches(':popover-open')) {
-            event.preventDefault();
+        if (!this._sessionPopover?.matches(':popover-open')) return;
+        event.preventDefault();
+        if (this._pageHistory.length > 0) {
+            this._navigateBack();
+        } else {
             this._closePopover();
         }
     }
@@ -1200,10 +1203,10 @@ class EdiromWebSocketConnector extends HTMLElement {
         const popoverTop = window.innerHeight * 0.025;
         this._sessionPopover.style.setProperty('--popover-origin-x', `${btnCenterX - popoverLeft}px`);
         this._sessionPopover.style.setProperty('--popover-origin-y', `${btnCenterY - popoverTop}px`);
-        this._pageHistory = [];
-        this._currentPageName = null;
-        const startPage = this._connectionState === 'session' ? 'sessionInformation' : 'initialPage';
-        this._switchPage(startPage, { pushHistory: false });
+        if (this._currentPageName === null) {
+            const startPage = this._connectionState === 'session' ? 'sessionInformation' : 'initialPage';
+            this._switchPage(startPage, { pushHistory: false });
+        }
         this._sessionPopover.showPopover();
     }
 
@@ -1273,8 +1276,9 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._sessionId = null;
             this._clientId = null;
             this._sessionData = null;
+            this._pageHistory = [];
+            this._currentPageName = null;
             if (this._sessionPopover?.matches(':popover-open')) {
-                this._pageHistory = [];
                 this._switchPage('initialPage', { pushHistory: false });
             }
         };
