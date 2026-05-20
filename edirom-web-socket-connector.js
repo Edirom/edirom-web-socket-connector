@@ -108,7 +108,7 @@ const templates = {
         flex-shrink: 0;
     }
 
-    #session-popover-header .status-icon {
+    #session-popover-header edirom-icon {
         width: 1.4rem;
         height: 1.4rem;
         flex-shrink: 0;
@@ -198,16 +198,68 @@ const templates = {
         color: var(--primary-color);
     }
 
-    #session-members-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        font-size: 1rem;
+    .members-table {
+        display: flex;
+        flex-direction: column;
+        margin: 0 0 4px;
     }
 
-    #session-members-list li {
-        padding: 4px 0;
-        border-bottom: 1px solid rgba(35, 42, 68, 0.15);
+    .member-row {
+        display: grid;
+        grid-template-columns: 20px 1fr auto;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(35, 42, 68, 0.1);
+    }
+
+    .member-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+    }
+
+    .member-icon edirom-icon {
+        width: 100%;
+        height: 100%;
+    }
+
+    .member-name {
+        font-size: 0.9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .member-name-input {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        height: 1lh;
+        box-sizing: border-box;
+        border: none;
+        border-bottom: 1px solid var(--secondary-color);
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        font-family: inherit;
+        outline: none;
+    }
+
+    .member-actions {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .member-actions .icon-button {
+        width: 18px;
+        height: 18px;
     }
 
     #bottom-row {
@@ -240,9 +292,10 @@ const templates = {
     /* ---- Page System ---- */
 
     #session-content h1 {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         font-weight: 600;
-        margin: 0 0 8px;
+        text-align: center;
+        margin: 0 0 20px;
         color: var(--primary-color);
     }
 
@@ -460,6 +513,13 @@ const templates = {
         border-color: color-mix(in oklch, var(--secondary-color) 70%, white);
     }
 
+    .join-error {
+        color: #e05353;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0 0 8px;
+    }
+
     .separator-row {
         display: flex;
         align-items: center;
@@ -527,12 +587,12 @@ const templates = {
 </style>
 <div id="ws-container">
     <button id="ws-button" aria-label="WebSocket Verbindung">
-        <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
+        <edirom-icon name="devices" size="fill"></edirom-icon>
     </button>
     <div id="session-popover" popover="manual">
         <div id="session-popover-inner">
             <div id="session-popover-header">
-                <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
+                <edirom-icon name="devices" size="fill"></edirom-icon>
                 <span>Vernetzte Arbeitsumgebung</span>
             </div>
             <div id="connection-news-area"></div>
@@ -656,7 +716,7 @@ const templates = {
         flex-shrink: 0;
     }
 
-    #session-popover-header .status-icon {
+    #session-popover-header edirom-icon {
         width: 1.4rem;
         height: 1.4rem;
         flex-shrink: 0;
@@ -745,16 +805,68 @@ const templates = {
         margin: 4px 0 0;
     }
 
-    #session-members-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        font-size: 1rem;
+    .members-table {
+        display: flex;
+        flex-direction: column;
+        margin: 0 0 4px;
     }
 
-    #session-members-list li {
+    .member-row {
+        display: grid;
+        grid-template-columns: 20px 1fr auto;
+        align-items: center;
+        gap: 8px;
         padding: 6px 0;
-        border-bottom: 1px solid rgba(35, 42, 68, 0.15);
+        border-bottom: 1px solid rgba(35, 42, 68, 0.1);
+    }
+
+    .member-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+    }
+
+    .member-icon edirom-icon {
+        width: 100%;
+        height: 100%;
+    }
+
+    .member-name {
+        font-size: 0.9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .member-name-input {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        height: 1lh;
+        box-sizing: border-box;
+        border: none;
+        border-bottom: 1px solid var(--secondary-color);
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        font-family: inherit;
+        outline: none;
+    }
+
+    .member-actions {
+        display: flex;
+        gap: 2px;
+        flex-shrink: 0;
+    }
+
+    .member-actions .icon-button {
+        width: 18px;
+        height: 18px;
     }
 
     #bottom-row {
@@ -1013,6 +1125,13 @@ const templates = {
         border-color: color-mix(in oklch, var(--secondary-color) 70%, white);
     }
 
+    .join-error {
+        color: #e05353;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0 0 8px;
+    }
+
     .separator-row {
         display: flex;
         align-items: center;
@@ -1081,12 +1200,12 @@ const templates = {
 </style>
 <div id="ws-container">
     <button id="ws-button" aria-label="WebSocket Verbindung">
-        <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
+        <edirom-icon name="devices" size="fill"></edirom-icon>
     </button>
     <div id="session-popover" popover="manual">
         <div id="session-popover-inner">
             <div id="session-popover-header">
-                <edirom-icon name="devices" size="fill" class="status-icon"></edirom-icon>
+                <edirom-icon name="devices" size="fill"></edirom-icon>
                 <span>Vernetzte Arbeitsumgebung</span>
             </div>
             <div id="connection-news-area"></div>
@@ -1106,9 +1225,10 @@ const templates = {
 };
 
 const CONNECTION_STATE_COLORS = {
-    disconnected: 'red',
-    connected: 'orange',
-    session: '#83c702'
+    failed: 'red',
+    connected: '#ed9418',
+    disconnected: 'var(--secondary-color)',
+    session: '#83c702',
 };
 
 
@@ -1123,9 +1243,11 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._clientId = null;
         this._sessionId = null;
         this._sessionData = null;
+        this._joinError = null;
         this.deviceName = "";
         this._currentPageName = null;
         this._pageHistory = [];
+        this.wsUrl = null;
     }
 
     static get observedAttributes() {
@@ -1142,6 +1264,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._applyTemplate();
         this._setupElements();
         this._setupEventListeners();
+        this._setConnectionState('disconnected');
         // this._connect();
         this.setAttribute('data-handles-back-request', '');
         this.addEventListener('back-request', this._handleBackRequest);
@@ -1176,9 +1299,7 @@ class EdiromWebSocketConnector extends HTMLElement {
                 }
             }
         } else if (name === 'ws-url') {
-            if (this.isConnected) {
-                this._reconnect();
-            }
+            this.wsUrl = newValue;
         }
     }
 
@@ -1197,7 +1318,7 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     _setupElements = () => {
         this._wsButton = this.shadow.querySelector('#ws-button');
-        this._statusIcons = this.shadow.querySelectorAll('.status-icon');
+        this._statusIcon = this._wsButton.querySelector('edirom-icon');
         this._sessionPopover = this.shadow.querySelector('#session-popover');
         this._connectionNewsArea = this.shadow.querySelector('#connection-news-area');
         this._sessionContent = this.shadow.querySelector('#session-content');
@@ -1259,25 +1380,24 @@ class EdiromWebSocketConnector extends HTMLElement {
     // -------------------------------------------------------------------------
 
     _setConnectionState = (state) => {
-        this._connectionState = state;
-        this._updateStatusIcon();
+        if (["disconnected", "connected", "failed", "session"].includes(state)) {
+            this._connectionState = state;
+            this._updateStatusIcon();
+        }
     }
 
     _updateStatusIcon = () => {
-        if (!this._statusIcons || this._statusIcons.length === 0) return;
-        const color = CONNECTION_STATE_COLORS[this._connectionState] ?? 'red';
-        for (const icon of this._statusIcons) {
-            icon.setAttribute('color', color);
-        }
+        if (!this._statusIcon) return;
+        const color = CONNECTION_STATE_COLORS[this._connectionState] ?? 'grey';
+        this._statusIcon.setAttribute('color', color);
     }
 
     // -------------------------------------------------------------------------
     // WebSocket
     // -------------------------------------------------------------------------
 
-    _connect = () => {
-        const wsUrl = this.getAttribute('ws-url');
-        if (!wsUrl) {
+    _buildInitialConnection = (sessionId = null) => {
+        if (!this.wsUrl) {
             console.warn('EdiromWebSocketConnector: no ws-url attribute set, skipping connection.');
             return;
         }
@@ -1291,15 +1411,15 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._sessionId = null;
         this._sessionData = null;
 
-        this._webSocket = new WebSocket(wsUrl);
+        const clientName = encodeURIComponent(this.deviceName);
+        const deviceType = encodeURIComponent(this.getDeviceType());
+        const base = `${this.wsUrl}?clientName=${clientName}&deviceType=${deviceType}`;
+        const url = sessionId ? `${base}&sessionId=${sessionId}` : base;
+        this._webSocket = new WebSocket(url);
 
         this._webSocket.onopen = () => {
             console.log('EdiromWebSocketConnector: connection opened.');
             this._setConnectionState('connected');
-            this._webSocket.send(JSON.stringify({ request: 'giveClientId' }));
-            this._webSocket.send(JSON.stringify({ request: 'giveSessionId' }));
-            this._sendUserAgent();
-            this._webSocket.send(JSON.stringify({ request: 'giveSessionData' }));
         };
 
         this._webSocket.onclose = () => {
@@ -1311,7 +1431,8 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._pageHistory = [];
             this._currentPageName = null;
             if (this._sessionPopover?.matches(':popover-open')) {
-                this._switchPage('initialPage', { pushHistory: false });
+                const page = this._joinError ? 'joinPage' : 'initialPage';
+                this._switchPage(page, { pushHistory: false });
             }
         };
 
@@ -1325,14 +1446,45 @@ class EdiromWebSocketConnector extends HTMLElement {
             }
             this._handleMessage(dataJson);
         };
+
+        this._webSocket.onerror = (error) => {
+            console.error('EdiromWebSocketConnector: connection error.', error);
+            this._setConnectionState('failed');
+        };
     }
 
-    _reconnect = () => {
-        this._connect();
+    _createNewSession = () => {
+        this._buildInitialConnection();
     }
+
+    _joinSession = (sessionId) => {
+        this._buildInitialConnection(sessionId.trim().toUpperCase());
+    }
+
+    _sendRemoveClient = (clientId) => {
+        if (this._webSocket?.readyState === WebSocket.OPEN) {
+            this._webSocket.send(JSON.stringify({ message: 'removeClient', clientId }));
+        }
+    }
+
+    _sendUpdateClientName = (name) => {
+        if (this._webSocket?.readyState === WebSocket.OPEN) {
+            this._webSocket.send(JSON.stringify({ message: 'updateClientName', clientName: name }));
+        }
+    }
+
 
     _handleMessage = (dataJson) => {
-        if (dataJson.sessionId && this._sessionId === null) {
+        console.log('EdiromWebSocketConnector: received message', dataJson);
+        if (dataJson.response === 'sessionJoined') {
+            this._clientId = dataJson.clientId;
+            this._sessionId = dataJson.sessionId;
+            this._sessionData = dataJson.sessionData;
+            this._setConnectionState('session');
+            this._switchPage('sessionInformation', { pushHistory: false });
+        } else if (dataJson.response === 'error' && dataJson.reason === 'sessionNotFound') {
+            this._showJoinError('Sitzung nicht gefunden.');
+        } else if (dataJson.sessionId && this._sessionId === null) {
             this._setSessionId(dataJson.sessionId);
         } else if (dataJson.clientId && this._clientId === null) {
             this._clientId = dataJson.clientId;
@@ -1352,14 +1504,13 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._sessionData = dataJson.sessionData;
             this._updateMembersList();
             this._showConnectionNews(dataJson.clientData, 'disconnect');
+        } else if (dataJson.response === 'sessionDataUpdated') {
+            this._sessionData = dataJson.sessionData;
+            this._updateMembersList();
         } else if (dataJson.sessionData) {
             this._sessionData = dataJson.sessionData;
             this._updateMembersList();
         }
-    }
-
-    _sendUserAgent = () => {
-        this._webSocket.send(JSON.stringify({ message: 'userAgent', userAgent: navigator.userAgent }));
     }
 
     // -------------------------------------------------------------------------
@@ -1368,7 +1519,6 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     _setSessionId = (sessionId) => {
         this._sessionId = sessionId;
-        this._setConnectionState('session');
         if (this._currentPageName === 'invitePage') {
             const sessionIdEl = this._sessionContent?.querySelector('#session-id');
             if (sessionIdEl) sessionIdEl.textContent = sessionId;
@@ -1391,7 +1541,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         item.classList.add('connection-news-item', type);
 
         const p = document.createElement('p');
-        const deviceLabel = `${clientData?.metadata?.deviceType ?? ''} ${clientData?.metadata?.os ?? ''} ${clientData?.metadata?.browser ?? ''}`.trim();
+        const deviceLabel = clientData?.metadata?.name ?? 'Unbekanntes Gerät';
         p.textContent = type === 'connect'
             ? `Ein neues Gerät "${deviceLabel}" ist Ihrer Sitzung beigetreten!`
             : `Ein Gerät "${deviceLabel}" hat die Sitzung verlassen!`;
@@ -1409,6 +1559,15 @@ class EdiromWebSocketConnector extends HTMLElement {
 
         if (!this._sessionPopover.matches(':popover-open')) {
             this._openPopover();
+        }
+    }
+
+    _showJoinError = (msg) => {
+        this._joinError = msg;
+        const errorEl = this._sessionContent?.querySelector('.join-error');
+        if (errorEl) {
+            errorEl.textContent = msg;
+            errorEl.hidden = false;
         }
     }
 
@@ -1539,7 +1698,9 @@ class EdiromWebSocketConnector extends HTMLElement {
         newSessionLabel.textContent = 'Sitzung erstellen';
         newSessionBtn.appendChild(newSessionIcon);
         newSessionBtn.appendChild(newSessionLabel);
-        newSessionBtn.addEventListener('click', () => this._switchPage('invitePage'));
+        newSessionBtn.addEventListener('click', () => {
+            this._createNewSession();
+        });
 
         const joinSessionBtn = document.createElement('button');
         joinSessionBtn.className = 'action-button';
@@ -1577,8 +1738,9 @@ class EdiromWebSocketConnector extends HTMLElement {
         h2.textContent = 'Geräte';
         page.appendChild(h2);
 
-        const membersList = document.createElement('ul');
+        const membersList = document.createElement('div');
         membersList.id = 'session-members-list';
+        membersList.className = 'members-table';
         this._renderMembersIntoList(membersList);
         page.appendChild(membersList);
 
@@ -1665,10 +1827,37 @@ class EdiromWebSocketConnector extends HTMLElement {
         input.setAttribute('autocorrect', 'off');
         input.setAttribute('autocapitalize', 'characters');
         input.setAttribute('spellcheck', 'false');
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && input.value.trim().length === 6) {
+                this._joinSession(input.value);
+            }
+        });
 
         inputRow.appendChild(inputLabel);
         inputRow.appendChild(input);
         page.appendChild(inputRow);
+
+        // Error message
+        const errorEl = document.createElement('p');
+        errorEl.className = 'join-error';
+        if (this._joinError) {
+            errorEl.textContent = this._joinError;
+            this._joinError = null;
+        } else {
+            errorEl.hidden = true;
+        }
+        page.appendChild(errorEl);
+
+        // Join button
+        const joinBtn = document.createElement('button');
+        joinBtn.className = 'add-device-button';
+        joinBtn.textContent = 'Beitreten';
+        joinBtn.addEventListener('click', () => {
+            if (input.value.trim().length === 6) {
+                this._joinSession(input.value);
+            }
+        });
+        page.appendChild(joinBtn);
 
         // Separator row
         const separatorRow = document.createElement('div');
@@ -1698,16 +1887,92 @@ class EdiromWebSocketConnector extends HTMLElement {
     // Page Helpers
     // -------------------------------------------------------------------------
 
-    _renderMembersIntoList = (ulElement) => {
-        ulElement.innerHTML = '';
+    _renderMembersIntoList = (container) => {
+        container.innerHTML = '';
         if (!this._sessionData) return;
-        const members = this._sessionData.sessionMembers ?? [];
+        const members = [...(this._sessionData.sessionMembers ?? [])];
+        members.sort((a, b) => (a.id === this._clientId ? -1 : b.id === this._clientId ? 1 : 0));
+
         for (const member of members) {
-            const li = document.createElement('li');
             const isOwn = member.id === this._clientId;
-            const label = `${member.metadata?.deviceType ?? ''} ${member.metadata?.os ?? ''} ${member.metadata?.browser ?? ''}`.trim();
-            li.textContent = isOwn ? `Du: ${label}` : label;
-            ulElement.appendChild(li);
+            const row = document.createElement('div');
+            row.className = 'member-row';
+
+            // Col 1: device icon
+            const iconCol = document.createElement('div');
+            iconCol.className = 'member-icon';
+            const deviceIcon = document.createElement('edirom-icon');
+            const dt = member.metadata?.deviceType ?? '';
+            const iconName = dt === 'tablet' ? 'tablet_mac' : dt === 'mobile' ? 'smartphone' : dt === 'desktop' ? 'laptop_mac' : 'mobile_question';
+            deviceIcon.setAttribute('name', iconName);
+            deviceIcon.setAttribute('size', 'fill');
+            iconCol.appendChild(deviceIcon);
+            row.appendChild(iconCol);
+
+            // Col 2: client name
+            const nameCol = document.createElement('div');
+            nameCol.className = 'member-name';
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = member.metadata?.name ?? '—';
+            nameCol.appendChild(nameSpan);
+            row.appendChild(nameCol);
+
+            // Col 3: action buttons
+            const actionsCol = document.createElement('div');
+            actionsCol.className = 'member-actions';
+
+            if (isOwn) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'icon-button';
+                editBtn.setAttribute('aria-label', 'Namen bearbeiten');
+                const editIcon = document.createElement('edirom-icon');
+                editIcon.setAttribute('name', 'edit');
+                editIcon.setAttribute('size', 'fill');
+                editBtn.appendChild(editIcon);
+                editBtn.addEventListener('click', () => {
+                    if (nameCol.querySelector('input')) return;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'member-name-input';
+                    input.value = member.metadata?.name ?? '';
+                    input.maxLength = 64;
+                    const save = () => {
+                        const newName = input.value.trim() || member.metadata?.name || '—';
+                        this.deviceName = newName;
+                        this.onDeviceNameChange();
+                        this._sendUpdateClientName(newName);
+                        if (member.metadata) member.metadata.name = newName;
+                        nameSpan.textContent = newName;
+                        if (input.parentNode === nameCol) nameCol.replaceChild(nameSpan, input);
+                    };
+                    input.addEventListener('blur', save);
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+                        if (e.key === 'Escape') {
+                            if (input.parentNode === nameCol) nameCol.replaceChild(nameSpan, input);
+                        }
+                    });
+                    nameCol.replaceChild(input, nameSpan);
+                    input.focus();
+                    input.select();
+                });
+                actionsCol.appendChild(editBtn);
+            }
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'icon-button';
+            removeBtn.setAttribute('aria-label', 'Gerät entfernen');
+            const removeIcon = document.createElement('edirom-icon');
+            removeIcon.setAttribute('name', 'close');
+            removeIcon.setAttribute('size', 'fill');
+            removeBtn.appendChild(removeIcon);
+            removeBtn.addEventListener('click', () => {
+                this._sendRemoveClient(member.id);
+            });
+            actionsCol.appendChild(removeBtn);
+
+            row.appendChild(actionsCol);
+            container.appendChild(row);
         }
     }
 
