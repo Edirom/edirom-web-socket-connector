@@ -249,7 +249,6 @@ const templates = {
     .device-name-row {
         display: flex;
         align-items: center;
-        gap: 8px;
         margin-bottom: 24px;
         font-size: 0.95rem;
         color: var(--primary-color);
@@ -797,7 +796,6 @@ const templates = {
     .device-name-row {
         display: flex;
         align-items: center;
-        gap: 8px;
         margin-bottom: 24px;
         font-size: 0.95rem;
         color: var(--primary-color);
@@ -1147,6 +1145,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         // this._connect();
         this.setAttribute('data-handles-back-request', '');
         this.addEventListener('back-request', this._handleBackRequest);
+        this.browser = bowser.getParser(window.navigator.userAgent);
         this.initDeviceName();
     }
 
@@ -1724,39 +1723,41 @@ class EdiromWebSocketConnector extends HTMLElement {
         }
     }
 
-    getPlatform = () => {
-        const browser = Bowser.getParser(navigator.userAgent);
-
+    getDeviceType = () => {
         // Fix for iPadOS 13+ which lies about being a Mac
         const isIPad = /Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
         if (isIPad) return 'tablet';
 
-        return browser.getPlatformType(); // "desktop", "mobile", "tablet"
+        return this.browser.getPlatformType(); // "desktop", "mobile", "tablet"
     }
 
     getOSName = () => {
-        const browser = Bowser.getParser(navigator.userAgent);
         // Fix for iPadOS 13+ which lies about being a Mac
         const isIPad = /Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
         if (isIPad) return 'iPadOS';
-        return browser.getOSName();
+        return this.browser.getOSName();
+    }
+
+    getVendor = () => {
+        let vendor = this.browser.getPlatform().vendor || '';
+        return vendor;
     }
 
     generateDeviceName = () => {
-        const platform = this.getPlatform();
+        const deviceType = this.getDeviceType();
         const osName = this.getOSName();
-        const vendor = browser.getVendor();
+        const vendor = this.getVendor();
 
-        let deviceType;
-        if (platform === 'mobile') {
-            deviceType = 'Smartphone';
-        } else if (platform === 'tablet') {
-            deviceType = 'Tablet';
+        let deviceTypeLabel = '';
+        if (deviceType === 'mobile') {
+            deviceTypeLabel = 'Smartphone';
+        } else if (deviceType === 'tablet') {
+            deviceTypeLabel = 'Tablet';
         } else {
-            deviceType = 'Computer';
+            deviceTypeLabel = 'Computer';
         }
 
-        let deviceName = `${vendor} ${osName} ${deviceType}`.trim();
+        let deviceName = `${vendor} ${osName} ${deviceTypeLabel}`.trim();
 
         if (!deviceName) {
             deviceName = 'Unknown Device';
