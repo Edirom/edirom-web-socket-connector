@@ -284,12 +284,23 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 50%;
-        background: #ef6a6a;
+        background: #0000002b;
         color: var(--primary-color);
         flex-shrink: 0;
     }
 
     /* ---- Page System ---- */
+
+    .page-session-information {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
+
+    .session-info-footer {
+        margin-top: auto;
+        padding-top: 40px;
+    }
 
     #session-content h1 {
         font-size: 1.25rem;
@@ -440,6 +451,16 @@ const templates = {
         width: 1.4rem;
         height: 1.4rem;
         flex-shrink: 0;
+    }
+
+    .dissolve-session-button {
+        margin-top: 10px;
+        background: #ed121261;
+        color: #fff;
+    }
+
+    .dissolve-session-button:hover {
+        background: color-mix(in oklch, #ed121261 85%, black);
     }
 
     .session-id-display {
@@ -891,7 +912,7 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 50%;
-        background: #ef6a6a;
+        background: #0000002b;
         color: var(--primary-color);
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
@@ -899,10 +920,22 @@ const templates = {
 
     /* ---- Page System ---- */
 
+    .page-session-information {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
+
+    .session-info-footer {
+        margin-top: auto;
+        padding-top: 40px;
+    }
+
     #session-content h1 {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         font-weight: 600;
-        margin: 0 0 8px;
+        text-align: center;
+        margin: 0 0 20px;
     }
 
     .device-name-row {
@@ -1053,6 +1086,16 @@ const templates = {
         width: 1.4rem;
         height: 1.4rem;
         flex-shrink: 0;
+    }
+
+    .dissolve-session-button {
+        margin-top: 10px;
+        background: #ed121261;
+        color: #fff;
+    }
+
+    .dissolve-session-button:active {
+        background: color-mix(in oklch, #ed121261 85%, black);
     }
 
     .session-id-display {
@@ -1473,6 +1516,12 @@ class EdiromWebSocketConnector extends HTMLElement {
         }
     }
 
+    _sendDissolveSession = () => {
+        if (this._webSocket?.readyState === WebSocket.OPEN) {
+            this._webSocket.send(JSON.stringify({ message: 'dissolveSession' }));
+        }
+    }
+
 
     _handleMessage = (dataJson) => {
         console.log('EdiromWebSocketConnector: received message', dataJson);
@@ -1756,6 +1805,27 @@ class EdiromWebSocketConnector extends HTMLElement {
         addDeviceBtn.addEventListener('click', () => this._switchPage('invitePage'));
         page.appendChild(addDeviceBtn);
 
+        const dissolveSessionBtn = document.createElement('button');
+        dissolveSessionBtn.className = 'add-device-button dissolve-session-button';
+        const dissolveIcon = document.createElement('edirom-icon');
+        dissolveIcon.setAttribute('name', 'destruction');
+        dissolveIcon.setAttribute('size', 'fill');
+        const dissolveLabel = document.createElement('span');
+        dissolveLabel.textContent = 'Sitzung auflösen';
+        dissolveSessionBtn.appendChild(dissolveIcon);
+        dissolveSessionBtn.appendChild(dissolveLabel);
+        dissolveSessionBtn.addEventListener('click', () => {
+            const shouldDissolve = window.confirm('Möchten Sie diese Sitzung wirklich auflösen?');
+            if (shouldDissolve) {
+                this._sendDissolveSession();
+            }
+        });
+
+        const footer = document.createElement('div');
+        footer.className = 'session-info-footer';
+        footer.appendChild(dissolveSessionBtn);
+        page.appendChild(footer);
+
         return page;
     }
 
@@ -1903,7 +1973,7 @@ class EdiromWebSocketConnector extends HTMLElement {
             iconCol.className = 'member-icon';
             const deviceIcon = document.createElement('edirom-icon');
             const dt = member.metadata?.deviceType ?? '';
-            const iconName = dt === 'tablet' ? 'tablet_mac' : dt === 'mobile' ? 'smartphone' : dt === 'desktop' ? 'laptop_mac' : 'mobile_question';
+            const iconName = dt === 'tablet' ? 'tablet_mac' : dt === 'mobile' ? 'smartphone' : dt === 'desktop' ? 'laptop_mac' : dt === 'tv' ? 'tv_gen' : 'mobile_question';
             deviceIcon.setAttribute('name', iconName);
             deviceIcon.setAttribute('size', 'fill');
             iconCol.appendChild(deviceIcon);
@@ -1967,7 +2037,11 @@ class EdiromWebSocketConnector extends HTMLElement {
             removeIcon.setAttribute('size', 'fill');
             removeBtn.appendChild(removeIcon);
             removeBtn.addEventListener('click', () => {
-                this._sendRemoveClient(member.id);
+                const deviceName = member.metadata?.name || 'Unbekanntes Gerät';
+                const shouldRemove = window.confirm(`Möchten Sie das Gerät "${deviceName}" wirklich entfernen?`);
+                if (shouldRemove) {
+                    this._sendRemoveClient(member.id);
+                }
             });
             actionsCol.appendChild(removeBtn);
 
