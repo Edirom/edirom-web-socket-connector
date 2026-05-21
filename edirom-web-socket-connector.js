@@ -192,10 +192,11 @@ const templates = {
 
     #session-id {
         text-align: center;
-        font-size: 0.9rem;
-        word-break: break-all;
-        margin: 4px 0 0;
+        font-size: 4rem;
+        font-family: monospace;
+        font-weight: 600;
         color: var(--primary-color);
+        letter-spacing: 4px;
     }
 
     .members-table {
@@ -463,14 +464,11 @@ const templates = {
         background: color-mix(in oklch, #ed121261 85%, black);
     }
 
-    .session-id-display {
-        text-align: center;
-        font-size: 1.1rem;
-        font-weight: 600;
-        word-break: break-all;
-        color: var(--primary-color);
-        margin: 0 0 16px;
+    .invite-type-container {
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
+
 
     .qr-code-container {
         text-align: center;
@@ -481,7 +479,7 @@ const templates = {
         max-width: 180px;
     }
 
-    .invite-row {
+    .url-row {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -491,7 +489,12 @@ const templates = {
         color: var(--primary-color);
     }
 
-    .invite-url-text {
+    .url-row .icon-button {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .url-text {
         flex: 1;
         font-size: 0.85rem;
         overflow: hidden;
@@ -821,9 +824,11 @@ const templates = {
 
     #session-id {
         text-align: center;
-        font-size: 0.85rem;
-        word-break: break-all;
-        margin: 4px 0 0;
+        font-size: 4rem;
+        font-family: monospace;
+        font-weight: 600;
+        color: var(--primary-color);
+        letter-spacing: 4px;
     }
 
     .members-table {
@@ -1098,13 +1103,16 @@ const templates = {
         background: color-mix(in oklch, #ed121261 85%, black);
     }
 
-    .session-id-display {
-        text-align: center;
-        font-size: 1.1rem;
-        font-weight: 600;
-        word-break: break-all;
-        margin: 0 0 16px;
+    .invite-type-container {
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
+
+    .invite-type-label {
+        text-align: center;
+        font-size: 0.88rem;
+        font-color: var(--primary-color);
+        }
 
     .qr-code-container {
         text-align: center;
@@ -1115,7 +1123,7 @@ const templates = {
         max-width: min(220px, 60vw);
     }
 
-    .invite-row {
+    .url-row {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -1125,7 +1133,12 @@ const templates = {
         color: var(--primary-color);
     }
 
-    .invite-url-text {
+    .url-row .icon-button {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .url-text {
         flex: 1;
         font-size: 0.85rem;
         overflow: hidden;
@@ -1834,26 +1847,44 @@ class EdiromWebSocketConnector extends HTMLElement {
         page.className = 'page-invite';
 
         // Session ID
-        const sessionIdEl = document.createElement('p');
-        sessionIdEl.className = 'session-id-display';
+        const sessionIdContainer = document.createElement('div');
+        sessionIdContainer.className = 'invite-type-container';
+        let inviteTypeLabel = document.createElement('div');
+        inviteTypeLabel.className = 'invite-type-label';
+        inviteTypeLabel.textContent = 'Sitzungs-ID';
+        sessionIdContainer.appendChild(inviteTypeLabel);
+        const sessionIdEl = document.createElement('div');
         sessionIdEl.id = 'session-id';
         sessionIdEl.textContent = this._sessionId ?? '—';
-        page.appendChild(sessionIdEl);
+        sessionIdContainer.appendChild(sessionIdEl);
+        page.appendChild(sessionIdContainer);
 
         // QR code
         const qrContainer = document.createElement('div');
-        qrContainer.className = 'qr-code-container';
-        qrContainer.id = 'qr-code-placeholder';
-        this._renderQrCode(qrContainer);
+        qrContainer.className = 'invite-type-container';
+        inviteTypeLabel = document.createElement('div');
+        inviteTypeLabel.className = 'invite-type-label';
+        inviteTypeLabel.textContent = 'QR-Code';
+        qrContainer.appendChild(inviteTypeLabel);
+        const qrPlaceholder = document.createElement('div');
+        qrPlaceholder.id = 'qr-code-placeholder';
+        this._renderQrCode(qrPlaceholder)
+        qrContainer.appendChild(qrPlaceholder);
         page.appendChild(qrContainer);
 
         // Invite URL row
+        const urlContainer = document.createElement('div');
+        urlContainer.className = 'invite-type-container';
+        inviteTypeLabel = document.createElement('div');
+        inviteTypeLabel.className = 'invite-type-label';
+        inviteTypeLabel.textContent = 'URL';
+        urlContainer.appendChild(inviteTypeLabel);
         const dummyUrl = 'https://edirom.example.com/session/join';
-        const inviteRow = document.createElement('div');
-        inviteRow.className = 'invite-row';
+        const urlRow = document.createElement('div');
+        urlRow.className = 'url-row';
 
         const urlText = document.createElement('p');
-        urlText.className = 'invite-url-text';
+        urlText.className = 'url-text';
         urlText.textContent = dummyUrl;
 
         const copyBtn = document.createElement('button');
@@ -1869,9 +1900,10 @@ class EdiromWebSocketConnector extends HTMLElement {
             });
         });
 
-        inviteRow.appendChild(urlText);
-        inviteRow.appendChild(copyBtn);
-        page.appendChild(inviteRow);
+        urlRow.appendChild(urlText);
+        urlRow.appendChild(copyBtn);
+        urlContainer.appendChild(urlRow);
+        page.appendChild(urlContainer);
 
         return page;
     }
