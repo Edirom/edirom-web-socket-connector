@@ -482,7 +482,7 @@ const templates = {
     .url-row {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         padding: 10px 14px;
         border-radius: 8px;
         background: var(--secondary-color);
@@ -501,6 +501,34 @@ const templates = {
         white-space: nowrap;
         text-overflow: ellipsis;
         margin: 0;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .copy-btn-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .copy-tooltip {
+        position: absolute;
+        bottom: calc(100% + 15px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--secondary-color);
+        color: var(--primary-color);
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s;
+    }
+
+    .copy-tooltip.visible {
+        opacity: 1;
     }
 
     .join-input-row {
@@ -1126,7 +1154,7 @@ const templates = {
     .url-row {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         padding: 10px 14px;
         border-radius: 8px;
         background: var(--secondary-color);
@@ -1145,6 +1173,34 @@ const templates = {
         white-space: nowrap;
         text-overflow: ellipsis;
         margin: 0;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .copy-btn-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .copy-tooltip {
+        position: absolute;
+        bottom: calc(100% + 15px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--secondary-color);
+        color: var(--primary-color);
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s;
+    }
+
+    .copy-tooltip.visible {
+        opacity: 1;
     }
 
     .join-input-row {
@@ -1304,10 +1360,12 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._currentPageName = null;
         this._pageHistory = [];
         this.wsUrl = null;
+        this._inviteUrl = null;
+        this._autoJoined = false;
     }
 
     static get observedAttributes() {
-        return ['layout-mode', 'ws-url'];
+        return ['layout-mode', 'ws-url', 'session', 'invite-url'];
     }
 
     // -------------------------------------------------------------------------
@@ -1356,6 +1414,19 @@ class EdiromWebSocketConnector extends HTMLElement {
             }
         } else if (name === 'ws-url') {
             this.wsUrl = newValue;
+        } else if (name === 'session') {
+            if (newValue) {
+                this._autoJoined = true;
+                this._joinSession(newValue);
+            }
+        } else if (name === 'invite-url') {
+            this._inviteUrl = newValue;
+            if (this._currentPageName === 'invitePage') {
+                const urlTextEl = this._sessionContent?.querySelector('.url-text');
+                if (urlTextEl) urlTextEl.textContent = this._getFullInviteUrl() ?? '—';
+                const qrPlaceholder = this._sessionContent?.querySelector('#qr-code-placeholder');
+                if (qrPlaceholder) this._renderQrCode(qrPlaceholder);
+            }
         }
     }
 
@@ -1544,6 +1615,10 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._sessionData = dataJson.sessionData;
             this._setConnectionState('session');
             this._switchPage('sessionInformation', { pushHistory: false });
+            if (this._autoJoined) {
+                this._autoJoined = false;
+                this._openPopover();
+            }
         } else if (dataJson.response === 'error' && dataJson.reason === 'sessionNotFound') {
             this._showJoinError('Sitzung nicht gefunden.');
         } else if (dataJson.sessionId && this._sessionId === null) {
@@ -1584,9 +1659,17 @@ class EdiromWebSocketConnector extends HTMLElement {
         if (this._currentPageName === 'invitePage') {
             const sessionIdEl = this._sessionContent?.querySelector('#session-id');
             if (sessionIdEl) sessionIdEl.textContent = sessionId;
+            const urlTextEl = this._sessionContent?.querySelector('.url-text');
+            if (urlTextEl) urlTextEl.textContent = this._getFullInviteUrl() ?? '—';
             const qrPlaceholder = this._sessionContent?.querySelector('#qr-code-placeholder');
             if (qrPlaceholder) this._renderQrCode(qrPlaceholder);
         }
+    }
+
+    _getFullInviteUrl = () => {
+        if (this._inviteUrl && this._sessionId) return this._inviteUrl + this._sessionId;
+        if (this._sessionId) return this._sessionId;
+        return null;
     }
 
     _updateMembersList = () => {
@@ -1879,13 +1962,20 @@ class EdiromWebSocketConnector extends HTMLElement {
         inviteTypeLabel.className = 'invite-type-label';
         inviteTypeLabel.textContent = 'URL';
         urlContainer.appendChild(inviteTypeLabel);
-        const dummyUrl = 'https://edirom.example.com/session/join';
         const urlRow = document.createElement('div');
         urlRow.className = 'url-row';
 
         const urlText = document.createElement('p');
         urlText.className = 'url-text';
-        urlText.textContent = dummyUrl;
+        urlText.textContent = this._getFullInviteUrl() ?? '—';
+
+        // Copy button in a relative wrapper for tooltip positioning
+        const copyWrapper = document.createElement('div');
+        copyWrapper.className = 'copy-btn-wrapper';
+
+        const copyTooltip = document.createElement('span');
+        copyTooltip.className = 'copy-tooltip';
+        copyTooltip.textContent = 'Kopiert!';
 
         const copyBtn = document.createElement('button');
         copyBtn.className = 'icon-button';
@@ -1894,14 +1984,45 @@ class EdiromWebSocketConnector extends HTMLElement {
         copyIcon.setAttribute('name', 'content_copy');
         copyIcon.setAttribute('size', 'fill');
         copyBtn.appendChild(copyIcon);
+
+        let tooltipTimer = null;
         copyBtn.addEventListener('click', () => {
-            navigator.clipboard?.writeText(dummyUrl).catch(err => {
+            const currentUrl = urlText.textContent;
+            navigator.clipboard?.writeText(currentUrl).then(() => {
+                clearTimeout(tooltipTimer);
+                copyTooltip.classList.add('visible');
+                tooltipTimer = setTimeout(() => copyTooltip.classList.remove('visible'), 2000);
+            }).catch(err => {
                 console.warn('EdiromWebSocketConnector: clipboard write failed.', err);
             });
         });
 
+        copyWrapper.appendChild(copyTooltip);
+        copyWrapper.appendChild(copyBtn);
+
+        // Share button — hidden on devices/browsers that don't support the Web Share API
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'icon-button';
+        shareBtn.setAttribute('aria-label', 'Teilen');
+        const shareIcon = document.createElement('edirom-icon');
+        shareIcon.setAttribute('name', 'share');
+        shareIcon.setAttribute('size', 'fill');
+        shareBtn.appendChild(shareIcon);
+        shareBtn.addEventListener('click', () => {
+            const currentUrl = urlText.textContent;
+            navigator.share({ url: currentUrl }).catch(err => {
+                if (err.name !== 'AbortError') {
+                    console.warn('EdiromWebSocketConnector: share failed.', err);
+                }
+            });
+        });
+        if (typeof navigator.share !== 'function') {
+            shareBtn.style.display = 'none';
+        }
+
         urlRow.appendChild(urlText);
-        urlRow.appendChild(copyBtn);
+        urlRow.appendChild(copyWrapper);
+        urlRow.appendChild(shareBtn);
         urlContainer.appendChild(urlRow);
         page.appendChild(urlContainer);
 
@@ -2084,13 +2205,14 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     _renderQrCode = (containerEl) => {
         if (!this._sessionId) return;
+        const content = this._getFullInviteUrl() ?? this._sessionId.toString();
         if (typeof qrcode === 'function') {
-            const qr = qrcode(0, 'L');
-            qr.addData(this._sessionId.toString());
+            const qr = qrcode(0, 'M');
+            qr.addData(content);
             qr.make();
             containerEl.innerHTML = qr.createImgTag(6);
         } else {
-            containerEl.textContent = this._sessionId;
+            containerEl.textContent = content;
         }
     }
 
