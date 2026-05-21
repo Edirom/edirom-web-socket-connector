@@ -285,7 +285,7 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 50%;
-        background: #0000002b;
+        background: var(--secondary-color);
         color: var(--primary-color);
         flex-shrink: 0;
     }
@@ -945,7 +945,7 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 50%;
-        background: #0000002b;
+        background: var(--secondary-color);
         color: var(--primary-color);
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
