@@ -1901,6 +1901,22 @@ class EdiromWebSocketConnector extends HTMLElement {
         addDeviceBtn.addEventListener('click', () => this._switchPage('invitePage'));
         page.appendChild(addDeviceBtn);
 
+        const leaveSessionBtn = document.createElement('button');
+        leaveSessionBtn.className = 'add-device-button';
+        const leaveIcon = document.createElement('edirom-icon');
+        leaveIcon.setAttribute('name', 'logout');
+        leaveIcon.setAttribute('size', 'fill');
+        const leaveLabel = document.createElement('span');
+        leaveLabel.textContent = 'Sitzung verlassen';
+        leaveSessionBtn.appendChild(leaveIcon);
+        leaveSessionBtn.appendChild(leaveLabel);
+        leaveSessionBtn.addEventListener('click', () => {
+            const shouldLeave = window.confirm('Möchten Sie diese Sitzung wirklich verlassen?');
+            if (shouldLeave) {
+                this._sendRemoveClient(this._clientId);
+            }
+        });
+
         const dissolveSessionBtn = document.createElement('button');
         dissolveSessionBtn.className = 'add-device-button dissolve-session-button';
         const dissolveIcon = document.createElement('edirom-icon');
@@ -1919,6 +1935,7 @@ class EdiromWebSocketConnector extends HTMLElement {
 
         const footer = document.createElement('div');
         footer.className = 'session-info-footer';
+        footer.appendChild(leaveSessionBtn);
         footer.appendChild(dissolveSessionBtn);
         page.appendChild(footer);
 
