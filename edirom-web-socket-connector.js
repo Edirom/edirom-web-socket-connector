@@ -187,7 +187,7 @@ const templates = {
         width: 100%;
         background: rgba(0, 0, 0, 0.3);
         transform-origin: left center;
-        animation: toast-progress-shrink 3.5s linear forwards;
+        animation: toast-progress-shrink 3s linear forwards;
     }
 
     @keyframes toast-appear {
@@ -916,7 +916,7 @@ const templates = {
         width: 100%;
         background: rgba(0, 0, 0, 0.3);
         transform-origin: left center;
-        animation: toast-progress-shrink 3.5s linear forwards;
+        animation: toast-progress-shrink 3s linear forwards;
     }
 
     @keyframes toast-appear {
@@ -1895,8 +1895,8 @@ class EdiromWebSocketConnector extends HTMLElement {
             }, { once: true });
         });
 
-        // Auto-dismiss after 3.5 s
-        toast._dismissTimer = setTimeout(() => this._dismissToast(toast), 3500);
+        // Auto-dismiss after 3 s
+        toast._dismissTimer = setTimeout(() => this._dismissToast(toast), 3000);
     }
 
     _createToast = (message, type) => {
