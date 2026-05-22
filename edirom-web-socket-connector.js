@@ -105,6 +105,8 @@ const templates = {
         color: var(--primary-color);
         font-size: 1rem;
         font-weight: 600;
+        user-select: none;
+        -webkit-user-select: none;
         flex-shrink: 0;
     }
 
@@ -217,6 +219,8 @@ const templates = {
         font-size: 1rem;
         margin: 12px 0 6px;
         color: var(--primary-color);
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     #session-content hr {
@@ -330,6 +334,8 @@ const templates = {
         border-radius: 50%;
         background: var(--secondary-color);
         color: var(--primary-color);
+        user-select: none;
+        -webkit-user-select: none;
         flex-shrink: 0;
     }
 
@@ -352,6 +358,8 @@ const templates = {
         text-align: center;
         margin: 0 0 20px;
         color: var(--primary-color);
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .device-name-row {
@@ -365,6 +373,8 @@ const templates = {
     .device-name-label {
         flex-shrink: 0;
         white-space: nowrap;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .device-name-text {
@@ -379,6 +389,8 @@ const templates = {
         border-radius: 6px;
         box-sizing: border-box;
         cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .device-name-input {
@@ -410,6 +422,8 @@ const templates = {
         border-radius: 6px;
         background: transparent;
         cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
         flex-shrink: 0;
     }
 
@@ -512,6 +526,10 @@ const templates = {
         padding-bottom: 20px;
     }
 
+    .invite-type-label {
+        user-select: none;
+        -webkit-user-select: none;
+    }
 
     .qr-code-container {
         text-align: center;
@@ -585,6 +603,8 @@ const templates = {
         font-size: 0.95rem;
         color: var(--primary-color);
         margin: 0;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .join-input {
@@ -634,6 +654,8 @@ const templates = {
         font-size: 0.85rem;
         font-weight: 600;
         letter-spacing: 0.05em;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .qr-scanner-placeholder {
@@ -663,6 +685,8 @@ const templates = {
         border-radius: 50%;
         background: var(--secondary-color);
         color: var(--primary-color);
+        user-select: none;
+        -webkit-user-select: none;
         flex-shrink: 0;
     }
 
@@ -808,6 +832,8 @@ const templates = {
         color: var(--primary-color);
         font-size: 1rem;
         font-weight: 600;
+        user-select: none;
+        -webkit-user-select: none;
         flex-shrink: 0;
     }
 
@@ -920,6 +946,8 @@ const templates = {
     #session-content h2 {
         font-size: 1rem;
         margin: 12px 0 6px;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     #session-content hr {
@@ -1035,6 +1063,8 @@ const templates = {
         color: var(--primary-color);
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     /* ---- Page System ---- */
@@ -1055,6 +1085,8 @@ const templates = {
         font-weight: 600;
         text-align: center;
         margin: 0 0 20px;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .device-name-row {
@@ -1068,6 +1100,8 @@ const templates = {
     .device-name-label {
         flex-shrink: 0;
         white-space: nowrap;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .device-name-text {
@@ -1082,6 +1116,8 @@ const templates = {
         border-radius: 6px;
         box-sizing: border-box;
         cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .device-name-input {
@@ -1113,6 +1149,8 @@ const templates = {
         border-radius: 6px;
         background: transparent;
         cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
     }
@@ -1226,6 +1264,8 @@ const templates = {
         text-align: center;
         font-size: 0.88rem;
         font-color: var(--primary-color);
+        user-select: none;
+        -webkit-user-select: none;
         }
 
     .qr-code-container {
@@ -1300,6 +1340,8 @@ const templates = {
         font-size: 0.95rem;
         color: var(--primary-color);
         margin: 0;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .join-input {
@@ -1349,6 +1391,8 @@ const templates = {
         font-size: 0.85rem;
         font-weight: 600;
         letter-spacing: 0.05em;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .qr-scanner-placeholder {
@@ -1380,6 +1424,8 @@ const templates = {
         color: var(--primary-color);
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     #back-button:active {
@@ -1648,15 +1694,23 @@ class EdiromWebSocketConnector extends HTMLElement {
                 else if (reason === null) this._showNotification('Verbindung unterbrochen.', 'red');
                 // reason === 'left' → no toast
             }
-            this._setConnectionState('disconnected');
+            if (this._connectionState !== 'failed') {
+                this._setConnectionState('disconnected');
+            }
+            const joinedFromJoinPage = !!this._joinError;
+            this._joinError = null;
             this._sessionId = null;
             this._clientId = null;
             this._sessionData = null;
             this._pageHistory = [];
             this._currentPageName = null;
             if (this._sessionPopover?.matches(':popover-open')) {
-                const page = this._joinError ? 'joinPage' : 'initialPage';
-                this._switchPage(page, { pushHistory: false });
+                if (joinedFromJoinPage) {
+                    this._pageHistory = ['initialPage'];
+                    this._switchPage('joinPage', { pushHistory: false });
+                } else {
+                    this._switchPage('initialPage', { pushHistory: false });
+                }
             }
         };
 
@@ -1674,6 +1728,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._webSocket.onerror = (error) => {
             console.error('EdiromWebSocketConnector: connection error.', error);
             this._setConnectionState('failed');
+            this._showNotification('Verbindung konnte nicht hergestellt werden.', 'red');
         };
     }
 
@@ -1713,6 +1768,7 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._sessionId = dataJson.sessionId;
             this._sessionData = dataJson.sessionData;
             this._setConnectionState('session');
+            this._pageHistory = [];
             this._switchPage('sessionInformation', { pushHistory: false });
             const joinMsg = this._isCreatingSession ? 'Sitzung wurde erstellt.' : 'Erfolgreich beigetreten.';
             this._showNotification(joinMsg, 'green');
@@ -1721,8 +1777,8 @@ class EdiromWebSocketConnector extends HTMLElement {
                 this._openPopover();
             }
         } else if (dataJson.response === 'error' && dataJson.reason === 'sessionNotFound') {
-            this._showJoinError('Sitzung nicht gefunden.');
-            this._showNotification('Sitzung nicht gefunden.', 'red');
+            this._joinError = true;
+            this._showNotification('Diese Sitzungs-ID existiert nicht.', 'red');
         } else if (dataJson.response === 'sessionDissolved') {
             if (!this._disconnectReason) this._disconnectReason = 'dissolved';
         } else if (dataJson.response === 'clientRemoved') {
@@ -2266,14 +2322,15 @@ class EdiromWebSocketConnector extends HTMLElement {
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'join-input';
+        input.minLength = 6;
         input.maxLength = 6;
         input.placeholder = '······';
         input.setAttribute('autocomplete', 'off');
         input.setAttribute('autocorrect', 'off');
         input.setAttribute('autocapitalize', 'characters');
         input.setAttribute('spellcheck', 'false');
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && input.value.trim().length === 6) {
+        input.addEventListener('input', () => {
+            if (input.value.trim().length === 6) {
                 this._joinSession(input.value);
             }
         });
@@ -2281,28 +2338,6 @@ class EdiromWebSocketConnector extends HTMLElement {
         inputRow.appendChild(inputLabel);
         inputRow.appendChild(input);
         page.appendChild(inputRow);
-
-        // Error message
-        const errorEl = document.createElement('p');
-        errorEl.className = 'join-error';
-        if (this._joinError) {
-            errorEl.textContent = this._joinError;
-            this._joinError = null;
-        } else {
-            errorEl.hidden = true;
-        }
-        page.appendChild(errorEl);
-
-        // Join button
-        const joinBtn = document.createElement('button');
-        joinBtn.className = 'add-device-button';
-        joinBtn.textContent = 'Beitreten';
-        joinBtn.addEventListener('click', () => {
-            if (input.value.trim().length === 6) {
-                this._joinSession(input.value);
-            }
-        });
-        page.appendChild(joinBtn);
 
         // Separator row
         const separatorRow = document.createElement('div');
