@@ -187,7 +187,7 @@ const templates = {
         width: 100%;
         background: rgba(0, 0, 0, 0.3);
         transform-origin: left center;
-        animation: toast-progress-shrink 4s linear forwards;
+        animation: toast-progress-shrink 3.5s linear forwards;
     }
 
     @keyframes toast-appear {
@@ -234,7 +234,9 @@ const templates = {
     }
 
     #qr-code-placeholder img {
-        max-width: 180px;
+        max-width: min(300px, 60vw);
+        max-height: min(300px, 60vw);
+        border-radius: 12px;
     }
 
     #session-id {
@@ -522,8 +524,8 @@ const templates = {
     }
 
     .invite-type-container {
-        padding-top: 20px;
-        padding-bottom: 20px;
+        padding-top: 13px;
+        padding-bottom: 13px;
     }
 
     .invite-type-label {
@@ -914,7 +916,7 @@ const templates = {
         width: 100%;
         background: rgba(0, 0, 0, 0.3);
         transform-origin: left center;
-        animation: toast-progress-shrink 4s linear forwards;
+        animation: toast-progress-shrink 3.5s linear forwards;
     }
 
     @keyframes toast-appear {
@@ -961,7 +963,9 @@ const templates = {
     }
 
     #qr-code-placeholder img {
-        max-width: min(220px, 60vw);
+        max-width: min(300px, 60vw);
+        max-height: min(300px, 60vw);
+        border-radius: 12px;
     }
 
     #session-id {
@@ -1256,8 +1260,8 @@ const templates = {
     }
 
     .invite-type-container {
-        padding-top: 20px;
-        padding-bottom: 20px;
+        padding-top: 13px;
+        padding-bottom: 13px;
     }
 
     .invite-type-label {
@@ -1891,8 +1895,8 @@ class EdiromWebSocketConnector extends HTMLElement {
             }, { once: true });
         });
 
-        // Auto-dismiss after 4 s
-        toast._dismissTimer = setTimeout(() => this._dismissToast(toast), 4000);
+        // Auto-dismiss after 3.5 s
+        toast._dismissTimer = setTimeout(() => this._dismissToast(toast), 3500);
     }
 
     _createToast = (message, type) => {
