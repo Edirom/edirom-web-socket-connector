@@ -114,50 +114,93 @@ const templates = {
         flex-shrink: 0;
     }
 
-    #connection-news-area {
-        flex-shrink: 0;
-        background-color: var(--tertiary-color);
-        padding: 0 20px;
-        box-sizing: border-box;
+    #notification-host {
+        position: fixed;
+        top: 16px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: fit-content;
+        max-width: min(480px, 90dvw);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+        border: none;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
-    .connection-news-item {
+    .notification-toast {
+        min-height: 70px;
+        min-width: 50px;
+        box-sizing: border-box;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        border-radius: 8px;
-        padding: 8px 12px;
-        margin-bottom: 6px;
-        font-size: 1rem;
-        color: #1f2333;
-        font-weight: 500;
+        gap: 14px;
+        padding: 10px 16px 10px;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        transform-origin: center center;
+        animation: toast-appear 0.35s cubic-bezier(0.22, 1.15, 0.36, 1) forwards;
     }
 
-    .connection-news-item.connect {
-        background-color: #83c702;
+    .notification-toast.dismissing {
+        animation: toast-dismiss 0.25s ease-in forwards;
     }
 
-    .connection-news-item.disconnect {
-        background-color: #e05353;
-        color: #fff;
-    }
+    .toast-green  { background: #83c702; color: #fff; }
+    .toast-yellow { background: #f0a500; color: #fff; }
+    .toast-red    { background: #e05353; color: #fff; }
+    .toast-grey   { background: #6b7280; color: #fff; }
 
-    .connection-news-item p {
-        margin: 0;
-        flex: 1;
-    }
-
-    .connection-news-dismiss {
-        border: none;
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 6px;
-        padding: 4px 10px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: bold;
-        color: inherit;
+    .notification-toast edirom-icon {
         flex-shrink: 0;
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .toast-message {
+        flex: 1;
+        font-size: 0.95rem;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .toast-progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+
+    .toast-progress-inner {
+        height: 100%;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        transform-origin: left center;
+        animation: toast-progress-shrink 4s linear forwards;
+    }
+
+    @keyframes toast-appear {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes toast-dismiss {
+        from { transform: scale(1); opacity: 1; }
+        to   { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes toast-progress-shrink {
+        from { transform: scaleX(1); }
+        to   { transform: scaleX(0); }
     }
 
     #session-content {
@@ -647,7 +690,6 @@ const templates = {
                 <edirom-icon name="devices" size="fill"></edirom-icon>
                 <span>Vernetzte Arbeitsumgebung</span>
             </div>
-            <div id="connection-news-area"></div>
             <div id="session-content"></div>
             <div id="bottom-row">
                 <button id="back-button" class="hidden" aria-label="Zurück">
@@ -659,6 +701,7 @@ const templates = {
             </div>
         </div>
     </div>
+    <div id="notification-host" popover="manual"></div>
 </div>
 `,
 
@@ -774,50 +817,93 @@ const templates = {
         flex-shrink: 0;
     }
 
-    #connection-news-area {
-        flex-shrink: 0;
-        background-color: var(--tertiary-color);
-        padding: 0 20px;
-        box-sizing: border-box;
+    #notification-host {
+        position: fixed;
+        top: 16px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: fit-content;
+        max-width: min(480px, 90dvw);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+        border: none;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
-    .connection-news-item {
+    .notification-toast {
+        min-height: 50px;
+        min-width: 100px;
+        box-sizing: border-box;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        border-radius: 8px;
-        padding: 8px 12px;
-        margin-bottom: 6px;
-        font-size: 1rem;
-        color: #1f2333;
-        font-weight: 500;
+        gap: 14px;
+        padding: 10px 16px 10px;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        transform-origin: center center;
+        animation: toast-appear 0.35s cubic-bezier(0.22, 1.15, 0.36, 1) forwards;
     }
 
-    .connection-news-item.connect {
-        background-color: #83c702;
+    .notification-toast.dismissing {
+        animation: toast-dismiss 0.25s ease-in forwards;
     }
 
-    .connection-news-item.disconnect {
-        background-color: #e05353;
-        color: #fff;
-    }
+    .toast-green  { background: #83c702; color: #fff; }
+    .toast-yellow { background: #f0a500; color: #fff; }
+    .toast-red    { background: #e05353; color: #fff; }
+    .toast-grey   { background: #6b7280; color: #fff; }
 
-    .connection-news-item p {
-        margin: 0;
-        flex: 1;
-    }
-
-    .connection-news-dismiss {
-        border: none;
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 6px;
-        padding: 4px 10px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: bold;
-        color: inherit;
+    .notification-toast edirom-icon {
         flex-shrink: 0;
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .toast-message {
+        flex: 1;
+        font-size: 0.95rem;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .toast-progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+
+    .toast-progress-inner {
+        height: 100%;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        transform-origin: left center;
+        animation: toast-progress-shrink 4s linear forwards;
+    }
+
+    @keyframes toast-appear {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes toast-dismiss {
+        from { transform: scale(1); opacity: 1; }
+        to   { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes toast-progress-shrink {
+        from { transform: scaleX(1); }
+        to   { transform: scaleX(0); }
     }
 
     #session-content {
@@ -1320,7 +1406,6 @@ const templates = {
                 <edirom-icon name="devices" size="fill"></edirom-icon>
                 <span>Vernetzte Arbeitsumgebung</span>
             </div>
-            <div id="connection-news-area"></div>
             <div id="session-content"></div>
             <div id="bottom-row">
                 <button id="back-button" class="hidden" aria-label="Zurück">
@@ -1332,6 +1417,7 @@ const templates = {
             </div>
         </div>
     </div>
+    <div id="notification-host" popover="manual"></div>
 </div>
 `
 };
@@ -1447,7 +1533,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._wsButton = this.shadow.querySelector('#ws-button');
         this._statusIcon = this._wsButton.querySelector('edirom-icon');
         this._sessionPopover = this.shadow.querySelector('#session-popover');
-        this._connectionNewsArea = this.shadow.querySelector('#connection-news-area');
+        this._notificationHost = this.shadow.querySelector('#notification-host');
         this._sessionContent = this.shadow.querySelector('#session-content');
         this._backButton = this.shadow.querySelector('#back-button');
         this._closeButton = this.shadow.querySelector('#close-button');
@@ -1621,6 +1707,7 @@ class EdiromWebSocketConnector extends HTMLElement {
             }
         } else if (dataJson.response === 'error' && dataJson.reason === 'sessionNotFound') {
             this._showJoinError('Sitzung nicht gefunden.');
+            this._showNotification('Sitzung nicht gefunden.', 'red');
         } else if (dataJson.sessionId && this._sessionId === null) {
             this._setSessionId(dataJson.sessionId);
         } else if (dataJson.clientId && this._clientId === null) {
@@ -1635,12 +1722,14 @@ class EdiromWebSocketConnector extends HTMLElement {
             console.log('EdiromWebSocketConnector: client connected.');
             this._sessionData = dataJson.sessionData;
             this._updateMembersList();
-            this._showConnectionNews(dataJson.clientData, 'connect');
+            const connectedName = dataJson.clientData?.metadata?.name ?? 'Unbekanntes Gerät';
+            this._showNotification(`"${connectedName}" ist der Sitzung beigetreten.`, 'green');
         } else if (dataJson.response === 'clientDisconnected') {
             console.log('EdiromWebSocketConnector: client disconnected.');
             this._sessionData = dataJson.sessionData;
             this._updateMembersList();
-            this._showConnectionNews(dataJson.clientData, 'disconnect');
+            const disconnectedName = dataJson.clientData?.metadata?.name ?? 'Unbekanntes Gerät';
+            this._showNotification(`"${disconnectedName}" hat die Sitzung verlassen.`, 'yellow');
         } else if (dataJson.response === 'sessionDataUpdated') {
             this._sessionData = dataJson.sessionData;
             this._updateMembersList();
@@ -1680,31 +1769,127 @@ class EdiromWebSocketConnector extends HTMLElement {
         }
     }
 
-    _showConnectionNews = (clientData, type) => {
-        if (!this._connectionNewsArea) return;
-        const item = document.createElement('div');
-        item.classList.add('connection-news-item', type);
+    // -------------------------------------------------------------------------
+    // Notification Toasts
+    // -------------------------------------------------------------------------
 
-        const p = document.createElement('p');
-        const deviceLabel = clientData?.metadata?.name ?? 'Unbekanntes Gerät';
-        p.textContent = type === 'connect'
-            ? `Ein neues Gerät "${deviceLabel}" ist Ihrer Sitzung beigetreten!`
-            : `Ein Gerät "${deviceLabel}" hat die Sitzung verlassen!`;
+    _toastIconMap = { green: 'check_circle', yellow: 'warning', red: 'error', grey: 'info' };
 
-        const dismissBtn = document.createElement('button');
-        dismissBtn.classList.add('connection-news-dismiss');
-        dismissBtn.textContent = 'Ok';
-        dismissBtn.addEventListener('click', () => {
-            item.remove();
+    _showNotification = (message, type = 'grey') => {
+        const toast = this._createToast(message, type);
+        const host = this._notificationHost;
+        if (!host) return;
+
+        // FLIP: First — record current positions of existing toasts
+        const existingToasts = [...host.children];
+        const oldRects = existingToasts.map(el => el.getBoundingClientRect());
+
+        // Prepend new toast (newest at top)
+        host.prepend(toast);
+
+        // Show the notification host if not already open
+        if (!host.matches(':popover-open')) {
+            host.showPopover();
+        }
+
+        // FLIP: Last — get new positions after prepend
+        const newRects = existingToasts.map(el => el.getBoundingClientRect());
+
+        // FLIP: Invert — translate existing toasts so they appear unmoved
+        existingToasts.forEach((el, i) => {
+            const deltaY = oldRects[i].top - newRects[i].top;
+            if (deltaY !== 0) {
+                el.style.transition = 'none';
+                el.style.transform = `translateY(${deltaY}px)`;
+            }
         });
 
-        item.appendChild(p);
-        item.appendChild(dismissBtn);
-        this._connectionNewsArea.appendChild(item);
+        // Force reflow
+        host.offsetHeight;
 
-        if (!this._sessionPopover.matches(':popover-open')) {
-            this._openPopover();
+        // FLIP: Play — animate existing toasts down to their new positions
+        existingToasts.forEach(el => {
+            el.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
+            el.style.transform = '';
+            el.addEventListener('transitionend', () => {
+                el.style.transition = '';
+            }, { once: true });
+        });
+
+        // Auto-dismiss after 4 s
+        toast._dismissTimer = setTimeout(() => this._dismissToast(toast), 4000);
+    }
+
+    _createToast = (message, type) => {
+        const toast = document.createElement('div');
+        toast.className = `notification-toast toast-${type}`;
+
+        const icon = document.createElement('edirom-icon');
+        icon.setAttribute('name', this._toastIconMap[type] ?? 'info');
+        icon.setAttribute('size', 'fill');
+        toast.appendChild(icon);
+
+        const msg = document.createElement('span');
+        msg.className = 'toast-message';
+        msg.textContent = message;
+        toast.appendChild(msg);
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'toast-progress-bar';
+        const progressInner = document.createElement('div');
+        progressInner.className = 'toast-progress-inner';
+        progressBar.appendChild(progressInner);
+        toast.appendChild(progressBar);
+
+        return toast;
+    }
+
+    _dismissToast = (toast) => {
+        clearTimeout(toast._dismissTimer);
+        toast.classList.add('dismissing');
+        toast.addEventListener('animationend', () => {
+            this._removeToast(toast);
+        }, { once: true });
+    }
+
+    _removeToast = (toast) => {
+        const host = this._notificationHost;
+        if (!host) return;
+
+        // FLIP: First — record positions of remaining toasts before removal
+        const remaining = [...host.children].filter(el => el !== toast);
+        const oldRects = remaining.map(el => el.getBoundingClientRect());
+
+        toast.remove();
+
+        if (host.children.length === 0) {
+            host.hidePopover();
+            return;
         }
+
+        // FLIP: Last — positions after removal (toasts shift up)
+        const newRects = remaining.map(el => el.getBoundingClientRect());
+
+        // FLIP: Invert
+        remaining.forEach((el, i) => {
+            const deltaY = oldRects[i].top - newRects[i].top;
+            if (deltaY !== 0) {
+                el.style.transition = 'none';
+                el.style.transform = `translateY(${deltaY}px)`;
+            }
+        });
+
+        // Force reflow
+        host.offsetHeight;
+
+        // FLIP: Play
+        remaining.forEach(el => {
+            el.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
+            el.style.transform = '';
+            el.addEventListener('transitionend', () => {
+                el.style.transition = '';
+            }, { once: true });
+        });
     }
 
     _showJoinError = (msg) => {
