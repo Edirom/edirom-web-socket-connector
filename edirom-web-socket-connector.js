@@ -1448,6 +1448,8 @@ class EdiromWebSocketConnector extends HTMLElement {
         this.wsUrl = null;
         this._inviteUrl = null;
         this._autoJoined = false;
+        this._disconnectReason = null;
+        this._isCreatingSession = false;
     }
 
     static get observedAttributes() {
@@ -1637,6 +1639,15 @@ class EdiromWebSocketConnector extends HTMLElement {
 
         this._webSocket.onclose = () => {
             console.log('EdiromWebSocketConnector: connection closed.');
+            const wasInSession = this._connectionState === 'session';
+            const reason = this._disconnectReason;
+            this._disconnectReason = null;
+            if (wasInSession) {
+                if (reason === 'dissolved') this._showNotification('Die Sitzung wurde aufgelöst.', 'yellow');
+                else if (reason === 'removed') this._showNotification('Dein Gerät wurde aus der Sitzung entfernt.', 'yellow');
+                else if (reason === null) this._showNotification('Verbindung unterbrochen.', 'red');
+                // reason === 'left' → no toast
+            }
             this._setConnectionState('disconnected');
             this._sessionId = null;
             this._clientId = null;
@@ -1667,10 +1678,12 @@ class EdiromWebSocketConnector extends HTMLElement {
     }
 
     _createNewSession = () => {
+        this._isCreatingSession = true;
         this._buildInitialConnection();
     }
 
     _joinSession = (sessionId) => {
+        this._isCreatingSession = false;
         this._buildInitialConnection(sessionId.trim().toUpperCase());
     }
 
@@ -1701,6 +1714,8 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._sessionData = dataJson.sessionData;
             this._setConnectionState('session');
             this._switchPage('sessionInformation', { pushHistory: false });
+            const joinMsg = this._isCreatingSession ? 'Sitzung wurde erstellt.' : 'Erfolgreich beigetreten.';
+            this._showNotification(joinMsg, 'green');
             if (this._autoJoined) {
                 this._autoJoined = false;
                 this._openPopover();
@@ -1708,6 +1723,10 @@ class EdiromWebSocketConnector extends HTMLElement {
         } else if (dataJson.response === 'error' && dataJson.reason === 'sessionNotFound') {
             this._showJoinError('Sitzung nicht gefunden.');
             this._showNotification('Sitzung nicht gefunden.', 'red');
+        } else if (dataJson.response === 'sessionDissolved') {
+            if (!this._disconnectReason) this._disconnectReason = 'dissolved';
+        } else if (dataJson.response === 'clientRemoved') {
+            if (!this._disconnectReason) this._disconnectReason = 'removed';
         } else if (dataJson.sessionId && this._sessionId === null) {
             this._setSessionId(dataJson.sessionId);
         } else if (dataJson.clientId && this._clientId === null) {
@@ -2098,6 +2117,7 @@ class EdiromWebSocketConnector extends HTMLElement {
         leaveSessionBtn.addEventListener('click', () => {
             const shouldLeave = window.confirm('Möchten Sie diese Sitzung wirklich verlassen?');
             if (shouldLeave) {
+                this._disconnectReason = 'left';
                 this._sendRemoveClient(this._clientId);
             }
         });
