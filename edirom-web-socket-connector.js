@@ -2,6 +2,23 @@ import '../edirom-core-web-components/src/edirom-icon.js';
 
 console.log("WebSocket Connector Web Component loaded");
 
+// Resolve the component's own script URL at definition time, so we can
+// locate vendor libraries relative to ourselves even when the component
+// is deployed at an unknown path.
+const _COMPONENT_BASE = (() => {
+    // Classic <script> tag
+    if (document.currentScript) {
+        return new URL('.', document.currentScript.src).href;
+    }
+    // ES module (imported or loaded with type="module")
+    try {
+        if (import.meta.url) {
+            return new URL('.', import.meta.url).href;
+        }
+    } catch (_) { }
+    return '';
+})();
+
 const templates = {
     desktop: `
 <style>
@@ -1500,6 +1517,61 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._autoJoined = false;
         this._disconnectReason = null;
         this._isCreatingSession = false;
+        this._browserReady = false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Vendor library loading (shared across all instances)
+    // -------------------------------------------------------------------------
+
+    static _bowserLoadPromise = null;
+    static _qrcodeLoadPromise = null;
+
+    /**
+     * Ensures a single vendor library is loaded by injecting a <script> tag
+     * into the host's <head>. Deduplicates across all instances of the
+     * component.
+     *
+     * @param {string} globalName - window property to check after load
+     * @param {string} relativePath - path relative to this component's script
+     * @returns {Promise<void>}
+     */
+    static _ensureLibrary(globalName, relativePath) {
+        if (window[globalName]) return Promise.resolve();
+
+        const cacheKey = `_${globalName}LoadPromise`;
+        if (EdiromWebSocketConnector[cacheKey]) {
+            return EdiromWebSocketConnector[cacheKey];
+        }
+
+        if (!_COMPONENT_BASE) {
+            return Promise.reject(new Error(
+                `Cannot determine component location to load ${relativePath}. ` +
+                `Preload the library with a <script> tag before this component.`
+            ));
+        }
+
+        const scriptSrc = new URL(relativePath, _COMPONENT_BASE).href;
+
+        EdiromWebSocketConnector[cacheKey] = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = scriptSrc;
+            script.onload = () => {
+                if (window[globalName]) {
+                    resolve();
+                } else {
+                    reject(new Error(
+                        `${relativePath} loaded but window.${globalName} is not set.`
+                    ));
+                }
+            };
+            script.onerror = () => {
+                reject(new Error(`Failed to load ${relativePath} from: ${scriptSrc}`));
+            };
+            document.head.appendChild(script);
+        });
+
+        return EdiromWebSocketConnector[cacheKey];
     }
 
     static get observedAttributes() {
@@ -1520,8 +1592,25 @@ class EdiromWebSocketConnector extends HTMLElement {
         // this._connect();
         this.setAttribute('data-handles-back-request', '');
         this.addEventListener('back-request', this._handleBackRequest);
-        this.browser = bowser.getParser(window.navigator.userAgent);
-        this.initDeviceName();
+
+        // Load bowser from the component's own vendor directory (injected into
+        // the host <head> if not already present). Once ready, initialise
+        // browser-dependent state.
+        EdiromWebSocketConnector._ensureLibrary('bowser', 'vendor/bowser-es5.js')
+            .then(() => {
+                this.browser = bowser.getParser(window.navigator.userAgent);
+                this._browserReady = true;
+                this.initDeviceName();
+            })
+            .catch((err) => {
+                console.warn('EdiromWebSocketConnector: bowser not available, using fallback.', err);
+                this.browser = null;
+                this.initDeviceName();
+            });
+
+        // Pre-load qrcode in the background — _renderQrCode checks for it at
+        // render time and falls back to plain text if absent.
+        EdiromWebSocketConnector._ensureLibrary('qrcode', 'vendor/qrcode.js').catch(() => {});
     }
 
     disconnectedCallback() {
@@ -2482,19 +2571,21 @@ class EdiromWebSocketConnector extends HTMLElement {
         const isIPad = /Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
         if (isIPad) return 'tablet';
 
-        return this.browser.getPlatformType(); // "desktop", "mobile", "tablet"
+        if (this.browser) return this.browser.getPlatformType();
+        return 'desktop'; // fallback when bowser hasn't loaded yet
     }
 
     getOSName = () => {
         // Fix for iPadOS 13+ which lies about being a Mac
         const isIPad = /Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
         if (isIPad) return 'iPadOS';
-        return this.browser.getOSName();
+        if (this.browser) return this.browser.getOSName();
+        return ''; // fallback when bowser hasn't loaded yet
     }
 
     getVendor = () => {
-        let vendor = this.browser.getPlatform().vendor || '';
-        return vendor;
+        if (this.browser) return this.browser.getPlatform().vendor || '';
+        return ''; // fallback when bowser hasn't loaded yet
     }
 
     generateDeviceName = () => {
