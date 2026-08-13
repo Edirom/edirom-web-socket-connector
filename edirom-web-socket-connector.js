@@ -66,6 +66,7 @@ const componentTemplate = `
         inset: 0;
         margin: auto;
         width: 95dvw;
+        max-width: 600px;
         height: 95dvh;
         border: none;
         padding: 0;
