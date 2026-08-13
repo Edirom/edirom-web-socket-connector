@@ -472,7 +472,9 @@ const componentTemplate = `
         align-items: center;
         justify-content: center;
         gap: 10px;
-        width: 35%;
+        width: 100%;
+        max-width: 230px;
+        aspect-ratio: 1 / 1;
         padding: 18px 10px;
         border: none;
         border-radius: 12px;
