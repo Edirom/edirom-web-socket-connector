@@ -1141,6 +1141,22 @@ class EdiromWebSocketConnector extends HTMLElement {
         }
     }
 
+    /**
+     * Sends a generic message to the WebSocket server.
+     * @param {string} type - Message type (e.g. "syncState")
+     * @param {Object|null} [payload=null] - Optional payload data
+     * @param {string[]|null} [clientTargets=null] - Optional list of client IDs to target;
+     *   omit or pass null to send to all other clients in the session
+     */
+    sendMessage = (type, payload = null, clientTargets = null) => {
+        if (this._webSocket?.readyState !== WebSocket.OPEN) return;
+        const message = { type };
+        if (payload !== null && payload !== undefined) message.payload = payload;
+        if (Array.isArray(clientTargets)) message.client_targets = clientTargets;
+        this._webSocket.send(JSON.stringify(message));
+        console.log('EdiromWebSocketConnector: message sent', message);
+    }
+
 
     _handleMessage = (dataJson) => {
         console.log('EdiromWebSocketConnector: received message', dataJson);
@@ -1157,6 +1173,22 @@ class EdiromWebSocketConnector extends HTMLElement {
                 this._autoJoined = false;
                 this._openPopover();
             }
+            if (dataJson.lastRelayed?.type) {
+                this.dispatchEvent(new CustomEvent('received-message', {
+                    detail: dataJson.lastRelayed,
+                    bubbles: true,
+                    composed: true
+                }));
+            }
+            this.dispatchEvent(new CustomEvent('session-joined', {
+                detail: {
+                    sessionId: dataJson.sessionId,
+                    hasLastRelayed: !!dataJson.lastRelayed,
+                    isCreatingSession: this._isCreatingSession
+                },
+                bubbles: true,
+                composed: true
+            }));
         } else if (dataJson.response === 'error' && dataJson.reason === 'sessionNotFound') {
             this._joinError = true;
             this._showNotification('Diese Sitzungs-ID existiert nicht.', 'red');
@@ -1168,7 +1200,7 @@ class EdiromWebSocketConnector extends HTMLElement {
             this._setSessionId(dataJson.sessionId);
         } else if (dataJson.clientId && this._clientId === null) {
             this._clientId = dataJson.clientId;
-        } else if (dataJson.message) {
+        } else if (dataJson.message || dataJson.type) {
             this.dispatchEvent(new CustomEvent('received-message', {
                 detail: dataJson,
                 bubbles: true,
