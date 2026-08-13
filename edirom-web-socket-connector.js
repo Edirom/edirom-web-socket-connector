@@ -895,6 +895,8 @@ class EdiromWebSocketConnector extends HTMLElement {
     disconnectedCallback() {
         console.log('EdiromWebSocketConnector disconnected!');
         this.removeEventListener('back-request', this._handleBackRequest);
+        document.removeEventListener('keydown', this._handleDocumentKeydown);
+        document.removeEventListener('click', this._handleDocumentClick, true);
         if (this._webSocket) {
             this._webSocket.onclose = null; // prevent state updates after removal
             this._webSocket.close();
@@ -953,6 +955,15 @@ class EdiromWebSocketConnector extends HTMLElement {
         this._closeButton.addEventListener('click', () => {
             this._closePopover();
         });
+
+        // `popover="manual"` has no built-in light dismissal, so close the
+        // session popover ourselves when the user presses Escape or clicks
+        // anywhere outside it. The toast notification host is intentionally
+        // NOT affected by these handlers.
+        document.addEventListener('keydown', this._handleDocumentKeydown);
+        // Capture phase: runs before the trigger button's own click handler,
+        // so opening (button shows the popover) and toggling closed both work.
+        document.addEventListener('click', this._handleDocumentClick, true);
     }
 
     _handleBackRequest = (event) => {
@@ -963,6 +974,20 @@ class EdiromWebSocketConnector extends HTMLElement {
         } else {
             this._closePopover();
         }
+    }
+
+    _handleDocumentKeydown = (event) => {
+        if (event.key !== 'Escape') return;
+        if (this._sessionPopover?.matches(':popover-open')) {
+            this._closePopover();
+        }
+    }
+
+    _handleDocumentClick = (event) => {
+        if (!this._sessionPopover?.matches(':popover-open')) return;
+        const path = event.composedPath();
+        if (path.includes(this._sessionPopover)) return;
+        this._closePopover();
     }
 
     _openPopover = () => {
@@ -1425,6 +1450,7 @@ class EdiromWebSocketConnector extends HTMLElement {
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
                 if (e.key === 'Escape') {
+                    e.stopPropagation(); // cancel editing only, keep popover open
                     if (input.parentNode === deviceNameRow) {
                         deviceNameRow.replaceChild(nameSpan, input);
                     }
@@ -1785,6 +1811,7 @@ class EdiromWebSocketConnector extends HTMLElement {
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
                         if (e.key === 'Escape') {
+                            e.stopPropagation(); // cancel editing only, keep popover open
                             if (input.parentNode === nameCol) nameCol.replaceChild(nameSpan, input);
                         }
                     });
