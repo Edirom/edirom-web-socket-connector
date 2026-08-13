@@ -1,6 +1,6 @@
 # Edirom Web Socket Connector
 
-Web Component for connecting multiple devices in a shared session via WebSocket. Supports session creation, joining via session ID or QR code, device management, and cross-device messaging. Two layout modes: `desktop` and `mobile`.
+Web Component for connecting multiple devices in a shared session via WebSocket. Supports session creation, joining via session ID or QR code, device management, and cross-device messaging.
 
 ## Usage
 
@@ -10,7 +10,6 @@ Web Component for connecting multiple devices in a shared session via WebSocket.
 
 ```html
 <edirom-web-socket-connector
-  layout-mode="mobile"
   ws-url="wss://example.com/ws"
   session="ABC123"
   invite-url="https://example.com/join/"
@@ -22,7 +21,6 @@ Web Component for connecting multiple devices in a shared session via WebSocket.
 
 | Attribute | Type | Description |
 |---|---|---|
-| `layout-mode` | `"desktop"` \| `"mobile"` | UI variant. Default: `"desktop"`. |
 | `ws-url` | string | WebSocket server URL. Required for connection. |
 | `session` | string | Session ID to auto-join on connect. When set, the component automatically joins the given session and opens the popover. |
 | `invite-url` | string | Base URL used to generate invite links and QR codes. Combined with the current session ID. |

@@ -19,740 +19,14 @@ const _COMPONENT_BASE = (() => {
     return '';
 })();
 
-const templates = {
-    desktop: `
+const componentTemplate = `
 <style>
     :host {
         display: block;
         height: 100%;
-    }
-
-    #ws-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-
-    #ws-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        padding: 0;
-        border: none;
-        border-radius: 50%;
-        background: transparent;
-        cursor: pointer;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    #ws-button:hover {
-        background: rgba(255, 255, 255, 0.15);
-    }
-
-    #ws-button edirom-icon {
-        width: 100%;
-        height: 100%;
-    }
-
-    #session-popover {
-        position: fixed;
-        inset: 0;
-        margin: auto;
-        width: 95dvw;
-        height: 95dvh;
-        border: none;
-        padding: 0;
-        border-radius: 12px;
-        background: transparent;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-        overflow: hidden;
-        transform-origin: var(--popover-origin-x, 50%) var(--popover-origin-y, 50%);
-        transition: transform 0.75s cubic-bezier(0.22, 1.15, 0.36, 1), opacity 0.15s ease-out;
-    }
-
-    @starting-style {
-        #session-popover:popover-open {
-            transform: scale(0.04);
-        }
-        #session-popover:popover-open::backdrop {
-            backdrop-filter: blur(0px);
-            -webkit-backdrop-filter: blur(0px);
-        }
-    }
-
-    #session-popover.closing {
-        transform: scale(0.04);
-        opacity: 0;
-        transition: transform 0.2s cubic-bezier(0.4, 0, 0.8, 0.3), opacity 0.2s ease-in 0.2s;
-    }
-
-    #session-popover.closing::backdrop {
-        backdrop-filter: blur(0px);
-        -webkit-backdrop-filter: blur(0px);
-        transition: backdrop-filter 0.2s ease-in;
-    }
-
-    #session-popover::backdrop {
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        transition: backdrop-filter 0.75s ease;
-    }
-
-    #session-popover-inner {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        padding: 0;
-        box-sizing: border-box;
-        gap: 0;
-    }
-
-    #session-popover-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 0 20px;
-        height: 50px;
-        box-sizing: border-box;
-        background-color: var(--secondary-color);
-        color: var(--primary-color);
-        font-size: 1rem;
-        font-weight: 600;
-        user-select: none;
-        -webkit-user-select: none;
-        flex-shrink: 0;
-    }
-
-    #session-popover-header edirom-icon {
-        width: 1.4rem;
-        height: 1.4rem;
-        flex-shrink: 0;
-    }
-
-    #notification-host {
-        position: fixed;
-        top: 16px;
-        left: 0;
-        right: 0;
-        margin: 0 auto;
-        width: fit-content;
-        max-width: min(480px, 90dvw);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        align-items: stretch;
-        border: none;
-        padding: 0;
-        background: transparent;
-        box-shadow: none;
-    }
-
-    .notification-toast {
-        min-height: 70px;
-        min-width: 50px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 10px 16px 10px;
-        border-radius: 12px;
-        position: relative;
-        overflow: hidden;
-        transform-origin: center center;
-        animation: toast-appear 0.35s cubic-bezier(0.22, 1.15, 0.36, 1) forwards;
-    }
-
-    .notification-toast.dismissing {
-        animation: toast-dismiss 0.25s ease-in forwards;
-    }
-
-    .toast-green  { background: #83c702; color: #fff; }
-    .toast-yellow { background: #f0a500; color: #fff; }
-    .toast-red    { background: #e05353; color: #fff; }
-    .toast-grey   { background: #6b7280; color: #fff; }
-
-    .notification-toast edirom-icon {
-        flex-shrink: 0;
-        width: 2rem;
-        height: 2rem;
-    }
-
-    .toast-message {
-        flex: 1;
-        font-size: 0.95rem;
-        font-weight: 500;
-        line-height: 1.4;
-    }
-
-    .toast-progress-bar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 0 0 12px 12px;
-        overflow: hidden;
-    }
-
-    .toast-progress-inner {
-        height: 100%;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        transform-origin: left center;
-        animation: toast-progress-shrink 3s linear forwards;
-    }
-
-    @keyframes toast-appear {
-        from { transform: scale(0); opacity: 0; }
-        to   { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes toast-dismiss {
-        from { transform: scale(1); opacity: 1; }
-        to   { transform: scale(0); opacity: 0; }
-    }
-
-    @keyframes toast-progress-shrink {
-        from { transform: scaleX(1); }
-        to   { transform: scaleX(0); }
-    }
-
-    #session-content {
-        flex: 1;
-        overflow-y: auto;
-        scrollbar-gutter: stable;
-        color: var(--primary-color);
-        background-color: var(--tertiary-color);
-        padding: 16px 20px;
-        box-sizing: border-box;
-    }
-
-    #session-content h2 {
-        font-size: 1rem;
-        margin: 12px 0 6px;
-        color: var(--primary-color);
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    #session-content hr {
-        border: none;
-        border-top: 1px solid rgba(35, 42, 68, 0.2);
-        margin: 12px 0;
-    }
-
-    #qr-code-placeholder {
-        text-align: center;
-    }
-
-    #qr-code-placeholder img {
-        max-width: min(300px, 60vw);
-        max-height: min(300px, 60vw);
-        border-radius: 12px;
-    }
-
-    #session-id {
-        text-align: center;
-        font-size: 4rem;
-        font-family: monospace;
-        font-weight: 600;
-        color: var(--primary-color);
-        letter-spacing: 4px;
-    }
-
-    .members-table {
-        display: flex;
-        flex-direction: column;
-        margin: 0 0 4px;
-    }
-
-    .member-row {
-        display: grid;
-        grid-template-columns: 20px 1fr auto;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 0;
-        border-bottom: 1px solid rgba(35, 42, 68, 0.1);
-    }
-
-    .member-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-    }
-
-    .member-icon edirom-icon {
-        width: 100%;
-        height: 100%;
-    }
-
-    .member-name {
-        font-size: 0.9rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        min-width: 0;
-    }
-
-    .member-name-input {
-        width: 100%;
-        min-width: 0;
-        padding: 0;
-        margin: 0;
-        height: 1lh;
-        box-sizing: border-box;
-        border: none;
-        border-bottom: 1px solid var(--secondary-color);
-        background: transparent;
-        color: inherit;
-        font-size: inherit;
-        line-height: inherit;
-        font-family: inherit;
-        outline: none;
-    }
-
-    .member-actions {
-        display: flex;
-        gap: 10px;
-        flex-shrink: 0;
-    }
-
-    .member-actions .icon-button {
-        width: 18px;
-        height: 18px;
-    }
-
-    #bottom-row {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 14px;
-        flex-shrink: 0;
-        height: 60px;
-        box-sizing: border-box;
-        background: transparent;
-        padding: 0 20px;
-    }
-
-    #close-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        cursor: pointer;
-        border: none;
-        border-radius: 50%;
-        background: var(--secondary-color);
-        color: var(--primary-color);
-        user-select: none;
-        -webkit-user-select: none;
-        flex-shrink: 0;
-    }
-
-    /* ---- Page System ---- */
-
-    .page-session-information {
-        display: flex;
-        flex-direction: column;
-        min-height: 100%;
-    }
-
-    .session-info-footer {
-        margin-top: auto;
-        padding-top: 40px;
-    }
-
-    #session-content h1 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        text-align: center;
-        margin: 0 0 20px;
-        color: var(--primary-color);
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .device-name-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 24px;
-        font-size: 0.95rem;
-        color: var(--primary-color);
-    }
-
-    .device-name-label {
-        flex-shrink: 0;
-        white-space: nowrap;
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .device-name-text {
-        flex: 0 1 auto;
-        min-width: 0;
-        font-weight: 600;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding: 4px 8px;
-        border: 1px solid transparent;
-        border-radius: 6px;
-        box-sizing: border-box;
-        cursor: pointer;
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .device-name-input {
-        flex: 0 1 auto;
-        min-width: 5ch;
-        font-size: 0.95rem;
-        font-weight: 600;
-        padding: 4px 8px;
-        border: 1px solid color-mix(in oklch, var(--secondary-color) 70%, transparent);
-        border-radius: 6px;
-        background: transparent;
-        color: var(--primary-color);
-        font-family: inherit;
-        box-sizing: border-box;
-        field-sizing: content;
-    }
-
-    .device-name-row .icon-button {
-        width: 20px;
-        height: 20px;
-    }
-
-    .icon-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        border: none;
-        border-radius: 6px;
-        background: transparent;
-        cursor: pointer;
-        user-select: none;
-        -webkit-user-select: none;
-        flex-shrink: 0;
-    }
-
-    .icon-button edirom-icon {
-        width: 100%;
-        height: 100%;
-    }
-
-    .action-buttons-row {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-
-    .action-button {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 35%;
-        padding: 20px 12px;
-        border: none;
-        border-radius: 12px;
-        background: var(--secondary-color);
-        color: var(--primary-color);
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 0.85rem;
-        font-weight: 500;
-        text-align: center;
-        line-height: 1.3;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    .action-button:hover {
-        background: color-mix(in oklch, var(--secondary-color) 85%, black);
-    }
-
-    .action-button edirom-icon {
-        width: 3rem;
-        height: 3rem;
-        display: block;
-    }
-
-    .intro-text {
-        font-size: 0.85rem;
-        color: var(--primary-color);
-        opacity: 0.7;
-        text-align: center;
-        margin: 0;
-        line-height: 1.5;
-    }
-
-    .add-device-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        padding: 14px 20px;
-        margin-top: 16px;
-        border: none;
-        border-radius: 10px;
-        background: var(--secondary-color);
-        color: var(--primary-color);
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 1rem;
-        font-weight: 600;
-        box-sizing: border-box;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    .add-device-button:hover {
-        background: color-mix(in oklch, var(--secondary-color) 85%, black);
-    }
-
-    .add-device-button edirom-icon {
-        width: 1.4rem;
-        height: 1.4rem;
-        flex-shrink: 0;
-    }
-
-    .dissolve-session-button {
-        margin-top: 10px;
-        background: #ed121261;
-        color: #fff;
-    }
-
-    .dissolve-session-button:hover {
-        background: color-mix(in oklch, #ed121261 85%, black);
-    }
-
-    .invite-type-container {
-        padding-top: 13px;
-        padding-bottom: 13px;
-    }
-
-    .invite-type-label {
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .qr-code-container {
-        text-align: center;
-        margin-bottom: 16px;
-    }
-
-    .qr-code-container img {
-        max-width: 180px;
-    }
-
-    .url-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 14px;
-        border-radius: 8px;
-        background: var(--secondary-color);
-        color: var(--primary-color);
-    }
-
-    .url-row .icon-button {
-        width: 1.2rem;
-        height: 1.2rem;
-    }
-
-    .url-text {
-        flex: 1;
-        font-size: 0.85rem;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        margin: 0;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    .copy-btn-wrapper {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .copy-tooltip {
-        position: absolute;
-        bottom: calc(100% + 15px);
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--secondary-color);
-        color: var(--primary-color);
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        border-radius: 6px;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.15s;
-    }
-
-    .copy-tooltip.visible {
-        opacity: 1;
-    }
-
-    .join-input-row {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 16px;
-    }
-
-    .join-input-label {
-        font-size: 0.95rem;
-        color: var(--primary-color);
-        margin: 0;
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .join-input {
-        font-size: 1.5rem;
-        font-weight: 600;
-        text-align: center;
-        letter-spacing: 0.3em;
-        padding: 12px;
-        border: 2px solid var(--secondary-color);
-        border-radius: 10px;
-        background: transparent;
-        color: var(--primary-color);
-        font-family: monospace;
-        width: 100%;
-        box-sizing: border-box;
-        text-transform: uppercase;
-    }
-
-    .join-input:focus {
-        outline: none;
-        border-color: color-mix(in oklch, var(--secondary-color) 70%, white);
-    }
-
-    .join-error {
-        color: #e05353;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin: 0 0 8px;
-    }
-
-    .separator-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 20px 0;
-        color: var(--primary-color);
-        opacity: 0.6;
-    }
-
-    .separator-line {
-        flex: 1;
-        height: 1px;
-        background: currentColor;
-    }
-
-    .separator-text {
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .qr-scanner-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 140px;
-        border: 2px dashed var(--secondary-color);
-        border-radius: 10px;
-        color: var(--primary-color);
-        opacity: 0.5;
-        font-size: 0.9rem;
-        text-align: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-
-    #back-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        cursor: pointer;
-        border: none;
-        border-radius: 50%;
-        background: var(--secondary-color);
-        color: var(--primary-color);
-        user-select: none;
-        -webkit-user-select: none;
-        flex-shrink: 0;
-    }
-
-    #back-button:hover {
-        background: color-mix(in oklch, var(--secondary-color) 85%, black);
-    }
-
-    #back-button.hidden {
-        display: none;
-    }
-
-    #close-button edirom-icon,
-    #back-button edirom-icon {
-        width: 1.4rem;
-        height: 1.4rem;
-    }
-</style>
-<div id="ws-container">
-    <button id="ws-button" aria-label="WebSocket Verbindung">
-        <edirom-icon name="devices" size="fill"></edirom-icon>
-    </button>
-    <div id="session-popover" popover="manual">
-        <div id="session-popover-inner">
-            <div id="session-popover-header">
-                <edirom-icon name="devices" size="fill"></edirom-icon>
-                <span>Vernetzte Arbeitsumgebung</span>
-            </div>
-            <div id="session-content"></div>
-            <div id="bottom-row">
-                <button id="back-button" class="hidden" aria-label="Zurück">
-                    <edirom-icon name="arrow_back" size="fill"></edirom-icon>
-                </button>
-                <button id="close-button" aria-label="Schließen">
-                    <edirom-icon name="close" size="fill"></edirom-icon>
-                </button>
-            </div>
-        </div>
-    </div>
-    <div id="notification-host" popover="manual"></div>
-</div>
-`,
-
-    mobile: `
-<style>
-    :host {
-        display: block;
-        height: 100%;
+        --_ws-primary: var(--primary-color, #000000);
+        --_ws-secondary: var(--secondary-color, #cacaca);
+        --_ws-tertiary: var(--tertiary-color, #faf6f0);
     }
 
     #ws-container {
@@ -847,8 +121,8 @@ const templates = {
         padding: 0 20px;
         height: 50px;
         box-sizing: border-box;
-        background-color: var(--secondary-color);
-        color: var(--primary-color);
+        background-color: var(--_ws-secondary);
+        color: var(--_ws-primary);
         font-size: 1rem;
         font-weight: 600;
         user-select: none;
@@ -955,8 +229,8 @@ const templates = {
         flex: 1;
         overflow-y: auto;
         scrollbar-gutter: stable;
-        color: var(--primary-color);
-        background-color: var(--tertiary-color);
+        color: var(--_ws-primary);
+        background-color: var(--_ws-tertiary);
         padding: 16px 20px;
         box-sizing: border-box;
         -webkit-overflow-scrolling: touch;
@@ -990,7 +264,7 @@ const templates = {
         font-size: 4rem;
         font-family: monospace;
         font-weight: 600;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         letter-spacing: 4px;
     }
 
@@ -1038,7 +312,7 @@ const templates = {
         height: 1lh;
         box-sizing: border-box;
         border: none;
-        border-bottom: 1px solid var(--secondary-color);
+        border-bottom: 1px solid var(--_ws-secondary);
         background: transparent;
         color: inherit;
         font-size: inherit;
@@ -1080,8 +354,8 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 50%;
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--_ws-secondary);
+        color: var(--_ws-primary);
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
         user-select: none;
@@ -1115,7 +389,7 @@ const templates = {
         align-items: center;
         margin-bottom: 24px;
         font-size: 0.95rem;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
     }
 
     .device-name-label {
@@ -1147,10 +421,10 @@ const templates = {
         font-size: 0.95rem;
         font-weight: 600;
         padding: 6px 10px;
-        border: 1px solid color-mix(in oklch, var(--secondary-color) 70%, transparent);
+        border: 1px solid color-mix(in oklch, var(--_ws-secondary) 70%, transparent);
         border-radius: 6px;
         background: transparent;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         font-family: inherit;
         box-sizing: border-box;
         field-sizing: content;
@@ -1202,8 +476,8 @@ const templates = {
         padding: 18px 10px;
         border: none;
         border-radius: 12px;
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--_ws-secondary);
+        color: var(--_ws-primary);
         cursor: pointer;
         font-family: inherit;
         font-size: 0.85rem;
@@ -1216,7 +490,7 @@ const templates = {
     }
 
     .action-button:active {
-        background: color-mix(in oklch, var(--secondary-color) 85%, black);
+        background: color-mix(in oklch, var(--_ws-secondary) 85%, black);
     }
 
     .action-button edirom-icon {
@@ -1227,7 +501,7 @@ const templates = {
 
     .intro-text {
         font-size: 0.85rem;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         opacity: 0.7;
         text-align: center;
         margin: 0;
@@ -1244,8 +518,8 @@ const templates = {
         margin-top: 16px;
         border: none;
         border-radius: 10px;
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--_ws-secondary);
+        color: var(--_ws-primary);
         cursor: pointer;
         font-family: inherit;
         font-size: 1rem;
@@ -1257,7 +531,7 @@ const templates = {
     }
 
     .add-device-button:active {
-        background: color-mix(in oklch, var(--secondary-color) 85%, black);
+        background: color-mix(in oklch, var(--_ws-secondary) 85%, black);
     }
 
     .add-device-button edirom-icon {
@@ -1284,7 +558,7 @@ const templates = {
     .invite-type-label {
         text-align: center;
         font-size: 0.88rem;
-        font-color: var(--primary-color);
+        color: var(--_ws-primary);
         user-select: none;
         -webkit-user-select: none;
         }
@@ -1304,8 +578,8 @@ const templates = {
         gap: 12px;
         padding: 10px 14px;
         border-radius: 8px;
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--_ws-secondary);
+        color: var(--_ws-primary);
     }
 
     .url-row .icon-button {
@@ -1335,8 +609,8 @@ const templates = {
         bottom: calc(100% + 15px);
         left: 50%;
         transform: translateX(-50%);
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--_ws-secondary);
+        color: var(--_ws-primary);
         font-size: 0.75rem;
         padding: 4px 8px;
         border-radius: 6px;
@@ -1359,7 +633,7 @@ const templates = {
 
     .join-input-label {
         font-size: 0.95rem;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         margin: 0;
         user-select: none;
         -webkit-user-select: none;
@@ -1371,10 +645,10 @@ const templates = {
         text-align: center;
         letter-spacing: 0.3em;
         padding: 12px;
-        border: 2px solid var(--secondary-color);
+        border: 2px solid var(--_ws-secondary);
         border-radius: 10px;
         background: transparent;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         font-family: monospace;
         width: 100%;
         box-sizing: border-box;
@@ -1383,7 +657,7 @@ const templates = {
 
     .join-input:focus {
         outline: none;
-        border-color: color-mix(in oklch, var(--secondary-color) 70%, white);
+        border-color: color-mix(in oklch, var(--_ws-secondary) 70%, white);
     }
 
     .join-error {
@@ -1398,7 +672,7 @@ const templates = {
         align-items: center;
         gap: 12px;
         margin: 20px 0;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         opacity: 0.6;
     }
 
@@ -1421,9 +695,9 @@ const templates = {
         align-items: center;
         justify-content: center;
         min-height: 140px;
-        border: 2px dashed var(--secondary-color);
+        border: 2px dashed var(--_ws-secondary);
         border-radius: 10px;
-        color: var(--primary-color);
+        color: var(--_ws-primary);
         opacity: 0.5;
         font-size: 0.9rem;
         text-align: center;
@@ -1441,8 +715,8 @@ const templates = {
         cursor: pointer;
         border: none;
         border-radius: 50%;
-        background: var(--secondary-color);
-        color: var(--primary-color);
+        background: var(--_ws-secondary);
+        color: var(--_ws-primary);
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
         user-select: none;
@@ -1450,7 +724,7 @@ const templates = {
     }
 
     #back-button:active {
-        background: color-mix(in oklch, var(--secondary-color) 85%, black);
+        background: color-mix(in oklch, var(--_ws-secondary) 85%, black);
     }
 
     #back-button.hidden {
@@ -1486,13 +760,12 @@ const templates = {
     </div>
     <div id="notification-host" popover="manual"></div>
 </div>
-`
-};
+`;
 
 const CONNECTION_STATE_COLORS = {
     failed: 'red',
     connected: '#ed9418',
-    disconnected: 'var(--secondary-color)',
+    disconnected: 'var(--_ws-secondary)',
     session: '#83c702',
 };
 
@@ -1502,7 +775,6 @@ class EdiromWebSocketConnector extends HTMLElement {
     constructor() {
         super();
         this.shadow = this.attachShadow({ mode: 'open', delegatesFocus: true });
-        this._mode = 'desktop';
         this._connectionState = 'disconnected';
         this._webSocket = null;
         this._clientId = null;
@@ -1575,7 +847,7 @@ class EdiromWebSocketConnector extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['layout-mode', 'ws-url', 'session', 'invite-url'];
+        return ['ws-url', 'session', 'invite-url'];
     }
 
     // -------------------------------------------------------------------------
@@ -1584,7 +856,6 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     connectedCallback() {
         console.log('EdiromWebSocketConnector connected!');
-        this._mode = this._getLayoutMode(this.getAttribute('layout-mode'));
         this._applyTemplate();
         this._setupElements();
         this._setupEventListeners();
@@ -1625,21 +896,7 @@ class EdiromWebSocketConnector extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
-        if (name === 'layout-mode') {
-            this._mode = this._getLayoutMode(newValue);
-            if (this.isConnected) {
-                this._applyTemplate();
-                this._setupElements();
-                this._setupEventListeners();
-                this._updateStatusIcon();
-                if (this._currentPageName) {
-                    const savedHistory = [...this._pageHistory];
-                    this._switchPage(this._currentPageName, { pushHistory: false });
-                    this._pageHistory = savedHistory;
-                    this._updateBackButton();
-                }
-            }
-        } else if (name === 'ws-url') {
+        if (name === 'ws-url') {
             this.wsUrl = newValue;
         } else if (name === 'session') {
             if (newValue) {
@@ -1661,11 +918,9 @@ class EdiromWebSocketConnector extends HTMLElement {
     // Template & Elements
     // -------------------------------------------------------------------------
 
-    _getLayoutMode = (layoutMode) => layoutMode === 'mobile' ? 'mobile' : 'desktop';
-
     _applyTemplate = () => {
         const template = document.createElement('template');
-        template.innerHTML = templates[this._mode];
+        template.innerHTML = componentTemplate;
         this.shadow.innerHTML = '';
         this.shadow.append(template.content.cloneNode(true));
     }
