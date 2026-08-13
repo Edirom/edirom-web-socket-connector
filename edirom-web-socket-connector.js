@@ -461,7 +461,7 @@ const componentTemplate = `
 
     .action-buttons-row {
         display: flex;
-        gap: 12px;
+        gap: 4%;
         justify-content: center;
         margin-bottom: 20px;
     }
