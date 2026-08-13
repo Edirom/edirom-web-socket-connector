@@ -27,6 +27,7 @@ const componentTemplate = `
         --_ws-primary: var(--primary-color, #000000);
         --_ws-secondary: var(--secondary-color, #cacaca);
         --_ws-tertiary: var(--tertiary-color, #faf6f0);
+        --_ws-quaternary: var(--quaternary-color, var(--_ws-secondary));
     }
 
     #ws-container {
@@ -468,13 +469,14 @@ const componentTemplate = `
     }
 
     .action-button {
+        container-type: inline-size;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 10px;
         width: 100%;
-        max-width: 230px;
+        max-width: 200px;
         aspect-ratio: 1 / 1;
         padding: 18px 10px;
         border: none;
@@ -483,7 +485,6 @@ const componentTemplate = `
         color: var(--_ws-primary);
         cursor: pointer;
         font-family: inherit;
-        font-size: 0.85rem;
         font-weight: 500;
         text-align: center;
         line-height: 1.3;
@@ -497,9 +498,13 @@ const componentTemplate = `
     }
 
     .action-button edirom-icon {
-        width: 3rem;
-        height: 3rem;
+        width: 40%;
+        height: 40%;
         display: block;
+    }
+
+    .action-button > span {
+        font-size: clamp(0.85rem, 8cqw, 1.6rem);
     }
 
     .intro-text {
@@ -768,7 +773,7 @@ const componentTemplate = `
 const CONNECTION_STATE_COLORS = {
     failed: 'red',
     connected: '#ed9418',
-    disconnected: 'var(--_ws-secondary)',
+    disconnected: 'var(--_ws-quaternary)',
     session: '#83c702',
 };
 

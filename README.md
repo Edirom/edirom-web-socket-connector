@@ -31,6 +31,27 @@ Web Component for connecting multiple devices in a shared session via WebSocket.
 |---|---|---|
 | `received-message` | `object` | Fired when a message is received from the WebSocket server. The `detail` property contains the parsed JSON message. |
 
+## Styling
+
+The component is themed via CSS custom properties. Override them on the element or any ancestor:
+
+| Custom property | Default | Description |
+|---|---|---|
+| `--primary-color` | `#000000` | Primary text and icon color |
+| `--secondary-color` | `#cacaca` | Background of headers, buttons and interactive elements |
+| `--tertiary-color` | `#faf6f0` | Background of the content area |
+| `--quaternary-color` | `--secondary-color` | Color of the disconnected status icon |
+
+To theme only this component, set the variables on the element:
+
+```css
+edirom-web-socket-connector {
+  --primary-color: #232a44;
+  --secondary-color: #e9d9af;
+  --tertiary-color: #faf6f0;
+}
+```
+
 ## Dependencies
 
 - **[`edirom-icon`](https://github.com/Edirom/edirom-core-web-components)** — for all icon rendering.
