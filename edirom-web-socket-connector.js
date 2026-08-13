@@ -1041,8 +1041,8 @@ class EdiromWebSocketConnector extends HTMLElement {
             if (wasInSession) {
                 if (reason === 'dissolved') this._showNotification('Die Sitzung wurde aufgelöst.', 'yellow');
                 else if (reason === 'removed') this._showNotification('Dein Gerät wurde aus der Sitzung entfernt.', 'yellow');
+                else if (reason === 'left') this._showNotification('Du hast die Sitzung verlassen.', 'yellow');
                 else if (reason === null) this._showNotification('Verbindung unterbrochen.', 'red');
-                // reason === 'left' → no toast
             }
             if (this._connectionState !== 'failed') {
                 this._setConnectionState('disconnected');
