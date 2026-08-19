@@ -747,12 +747,12 @@ const componentTemplate = `
 </style>
 <div id="ws-container">
     <button id="ws-button" aria-label="WebSocket Verbindung">
-        <edirom-icon name="devices" size="fill"></edirom-icon>
+        <edirom-icon name="hub" size="fill"></edirom-icon>
     </button>
     <div id="session-popover" popover="manual">
         <div id="session-popover-inner">
             <div id="session-popover-header">
-                <edirom-icon name="devices" size="fill"></edirom-icon>
+                <edirom-icon name="hub" size="fill"></edirom-icon>
                 <span>Vernetzte Arbeitsumgebung</span>
             </div>
             <div id="session-content"></div>
